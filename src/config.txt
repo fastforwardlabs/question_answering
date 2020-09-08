@@ -1,0 +1,65 @@
+# ================ [REQUIRED PARAMS] ================
+--model_type            distilbert     
+--model_name_or_path    twmkn9/distilbert-base-uncased-squad2
+--output_dir            /home/cdsw/models/distilbert
+
+# ================ [DATA PARAMS] ================
+--data_dir      /home/cdsw/data/squad            # The input data dir -- should contain Q&A examples as .json files
+--train_file    mini_train-v2.0.json     # The input training file. If data_dir is specified, will look for the file there
+--predict_file  dev-v2.0.json       # The input evaluation file. If data_dir is specified, will look for the file there
+#--verbose_logging                  # Uncomment this flag to print all warnings related to data processing 
+#--overwrite_output_dir             # Uncomment this flag to overwrite the content of the output directory
+#--overwrite_cache                  # Uncomment this flag to overwrite the cached training and/or evaluation datasets
+# TODO: CHANGE THE NAME OF THIS FLAG
+--version_2_with_negative          # Uncomment this flag if working with examples wherein some do not have an answer 
+
+# ================ [OPTIONAL TRANSFORMER PARAMS] ================
+--do_lower_case                    # Uncomment this flag if using an uncased model
+#--config_name                      
+#--tokenizer_name 
+#--cache_dir                        # NOT THE SAME CACHE AS ABOVE: Model cache directory for storing pre-trained models downloaded from s3
+--lang_id   0
+
+# ================ [QA BEHAVIOR PARAMS] ================
+--max_seq_length        384         # The maximum total input sequence length after tokenization
+--doc_stride            128         # Stride between segments when chunking long documents 
+--max_query_length      64          # Max number of tokens for the question
+--max_answer_length     30          # Max number of tokens allowed for the answer
+
+--null_score_diff_threshold 0.0
+--n_best_size   5                  # Number of top best predictions to generate for each question during evaluation 
+
+# ================ [EPOCHS / BATCHING / LOGGING] ================
+--num_train_epochs  1.0
+--per_gpu_train_batch_size  64
+--per_gpu_eval_batch_size   8
+--logging_steps 500
+--save_steps    500
+--warmup_steps  0
+--max_steps     -1
+
+# ================ [OPTIMIZER PARAMS] ================
+--learning_rate 5e-5
+--weight_decay  0.0
+--adam_epsilon  1e-8
+--max_grad_norm 1.0
+--gradient_accumulation_steps   1
+
+# ================ [MISC PARAMS] ================
+--seed          42
+--local_rank    -1
+--threads       12
+--no_cuda                          # Uncomment this flag to not use CUDA even when available
+#--eval_all_checkpoints             # Uncomment this flag to evaluate checkpoints starting with the same prefix as model_name ending and ending with step number
+#--evaluate_during_training         # Uncomment this flag to run evaluation during training at each logging step
+
+
+# Uncomment the flags below to use 16-bit (mixed) precision (through NVIDIA apex) instead of 32-bit
+# Apex AMP optimization level selected in ['O0', 'O1', 'O2', and 'O3']
+# See details at https://nvidia.github.io/apex/amp.html" 
+#--fp16 
+#--fp16_opt_level    "O1"
+
+# DO I NEED THESE ANYMORE???
+#--do_train
+#--do_eval

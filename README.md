@@ -1,0 +1,2 @@
+# Question Answering
+This repo is complimentary to the one(s) created during the FF1 project. This repo modifies the code in those repositories to make them more user friendly for use on the Cloudera CDSW/CML platforms
