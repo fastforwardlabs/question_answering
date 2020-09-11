@@ -1,28 +1,18 @@
+import os
 import logging
-import os 
-import random
-import numpy as np
 
 import torch
+
 from transformers.data.processors.squad import (
     SquadV1Processor, 
     SquadV2Processor, 
     squad_convert_examples_to_features
 )
 
-logger = logging.getLogger(__name__)
-
-def set_seed(args):
-    random.seed(args.seed)
-    np.random.seed(args.seed)
-    torch.manual_seed(args.seed)
-    if args.n_gpu > 0:
-        torch.cuda.manual_seed_all(args.seed)
-
-def to_list(tensor):
-    return tensor.detach().cpu().tolist()
-  
 def load_and_cache_examples(args, tokenizer, evaluate=False, output_examples=False):
+  
+    logger = logging.getLogger('Eval.data_loader') if evaluate else logging.getLogger('Train.data_loader')
+    
     if args.local_rank not in [-1, 0] and not evaluate:
       # Make sure only the first process in distributed training process the dataset, and the others will use the cache
       torch.distributed.barrier()

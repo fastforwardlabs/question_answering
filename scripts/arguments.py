@@ -217,13 +217,3 @@ if args.doc_stride >= args.max_seq_length - args.max_query_length:
         "stride or increase the maximum length to ensure the features are correctly built."
     )
 
-if (
-    os.path.exists(args.output_dir)
-    and os.listdir(args.output_dir)
-    and not args.overwrite_output_dir
-):
-    raise ValueError(
-        "Output directory ({}) already exists and is not empty. Use --overwrite_output_dir to overcome.".format(
-            args.output_dir
-        )
-    )

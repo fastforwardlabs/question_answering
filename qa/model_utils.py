@@ -1,39 +1,58 @@
-# Here we'll put a version of the run_squad.py training portion 
-# IMHO, run_squad.py is too complicated and tries to do too many things. 
-# Need to break them down into smaller, bite-sized chunks
-
-import logging
 import os
-import timeit
-
+import logging
 import numpy as np
-import torch
-from torch.utils.data import DataLoader, RandomSampler
-from torch.utils.data.distributed import DistributedSampler
+import timeit
 from tqdm import tqdm, trange
 
+import torch
+from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
+from torch.utils.data.distributed import DistributedSampler
+
 from transformers import (
+    WEIGHTS_NAME,
     AdamW,
     AutoConfig,
     AutoModelForQuestionAnswering,
     AutoTokenizer,
     get_linear_schedule_with_warmup,
+    squad_convert_examples_to_features
 )
 
-#try:
-#    from torch.utils.tensorboard import SummaryWriter
-#except ImportError:
-#    from tensorboardX import SummaryWriter
+from transformers.data.metrics.squad_metrics import (
+  compute_predictions_log_probs,
+  compute_predictions_logits,
+  squad_evaluate,
+)
+
+from transformers.data.processors.squad import SquadResult
+
+from qa.data.loader import load_and_cache_examples
+from qa.utils import to_list
+
+def load_pretrained_model(args):
+    args.model_type = args.model_type.lower()
+    config = AutoConfig.from_pretrained(
+      args.config_name if args.config_name else args.model_name_or_path,
+      cache_dir=args.cache_dir if args.cache_dir else None,
+    )
+    tokenizer = AutoTokenizer.from_pretrained(
+      args.tokenizer_name if args.tokenizer_name else args.model_name_or_path,
+      do_lower_case=args.do_lower_case,
+      cache_dir=args.cache_dir if args.cache_dir else None,
+    )
+    model = AutoModelForQuestionAnswering.from_pretrained(
+      args.model_name_or_path,
+      from_tf=bool(".ckpt" in args.model_name_or_path),
+      config=config,
+      cache_dir=args.cache_dir if args.cache_dir else None,
+    )
     
+    return model, tokenizer
     
-from evaluate import evaluate_model
-from utils import *
-
-logger = logging.getLogger(__name__)
-
-
 def train_model(args, train_dataset, model, tokenizer):
     """ INITIALIZING """
+
+    logger = logging.getLogger("Train.train_model")
 
     # If not training on distributed GPUs, initliaze Summary Writer
     #if args.local_rank in [-1, 0]:
@@ -203,7 +222,8 @@ def train_model(args, train_dataset, model, tokenizer):
                     tb_writer.add_scalar("lr", scheduler.get_lr()[0], global_step)
                     tb_writer.add_scalar("loss", (tr_loss - logging_loss) / args.logging_steps, global_step)
                     logging_loss = tr_loss
-
+                
+                # TODO: something is wonky with model saving
                 # Save model checkpoint
                 if args.local_rank in [-1, 0] and args.save_steps > 0 and global_step % args.save_steps == 0:
                     output_dir = os.path.join(args.output_dir, "checkpoint-{}".format(global_step))
@@ -231,95 +251,138 @@ def train_model(args, train_dataset, model, tokenizer):
 
     return global_step, tr_loss / global_step
   
-def main(args):
   
-    # Setup CUDA, GPU & distributed training
-    if args.local_rank == -1 or args.no_cuda:
-        device = torch.device("cuda" if torch.cuda.is_available() and not args.no_cuda else "cpu")
-        args.n_gpu = 0 if args.no_cuda else torch.cuda.device_count()
-        
-        if args.no_cuda:
-            # if working without GPUs, maximize CPU computation (single machine)
-            torch.set_num_threads(args.threads) 
-
-    else:  # Initializes the distributed backend which will take care of sychronizing nodes/GPUs
-        torch.cuda.set_device(args.local_rank)
-        device = torch.device("cuda", args.local_rank)
-        torch.distributed.init_process_group(backend="nccl")
-        args.n_gpu = 1
-    args.device = device
-
-    # Setup logging
-    logging.basicConfig(
-      format="%(asctime)s - %(levelname)s - %(name)s -   %(message)s",
-      datefmt="%m/%d/%Y %H:%M:%S",
-      level=logging.INFO if args.local_rank in [-1, 0] else logging.WARN,
-    )
-    logger.warning(
-      "Process rank: %s, device: %s, n_gpu: %s, distributed training: %s, 16-bits training: %s",
-      args.local_rank,
-      device,
-      args.n_gpu,
-      bool(args.local_rank != -1),
-      args.fp16,
-    )
-
-    # Set seed
-    set_seed(args)
-
-    # Make sure only the first process in distributed training will download model & vocab
-    if args.local_rank not in [-1, 0]:
-        torch.distributed.barrier()
-
-    # Load pretrained model and tokenizer
-    args.model_type = args.model_type.lower()
-    config = AutoConfig.from_pretrained(
-      args.config_name if args.config_name else args.model_name_or_path,
-      cache_dir=args.cache_dir if args.cache_dir else None,
-    )
-    tokenizer = AutoTokenizer.from_pretrained(
-      args.tokenizer_name if args.tokenizer_name else args.model_name_or_path,
-      do_lower_case=args.do_lower_case,
-      cache_dir=args.cache_dir if args.cache_dir else None,
-    )
-    model = AutoModelForQuestionAnswering.from_pretrained(
-      args.model_name_or_path,
-      from_tf=bool(".ckpt" in args.model_name_or_path),
-      config=config,
-      cache_dir=args.cache_dir if args.cache_dir else None,
-    )
-
-    if args.local_rank == 0:
-        # Make sure only the first process in distributed training will download model & vocab
-        torch.distributed.barrier()
-    model.to(args.device)
-
-    logger.info("Training/evaluation parameters %s", args)
-
-    train_dataset = load_and_cache_examples(args, tokenizer, evaluate=False, output_examples=False)
-    global_step, tr_loss = train_model(args, train_dataset, model, tokenizer)
-    logger.info(" global_step = %s, average loss = %s", global_step, tr_loss)
-
-    # Save the trained model and the tokenizer
-    if args.local_rank == -1 or torch.distributed.get_rank() == 0:
-        logger.info("Saving model checkpoint to %s", args.output_dir)
-        # Save a trained model, configuration and tokenizer using `save_pretrained()`.
-        # They can then be reloaded using `from_pretrained()`
-        # Take care of distributed/parallel training
-        model_to_save = model.module if hasattr(model, "module") else model
-        model_to_save.save_pretrained(args.output_dir)
-        tokenizer.save_pretrained(args.output_dir)
-
-        # Good practice: save your training arguments together with the trained model
-        torch.save(args, os.path.join(args.output_dir, "training_args.bin"))
-
+def evaluate_model(args, model, tokenizer, prefix=""):
   
-    logger.info("Training complete.")
-    
+  logger = logging.getLogger("Eval.evaluate_model")
+  
+  dataset, examples, features = load_and_cache_examples(args, tokenizer, evaluate=True, output_examples=True)
 
-if __name__ == "__main__":
-    model_name = "twmkn9/distilbert-base-uncased-squad2"
+  if not os.path.exists(args.output_dir) and args.local_rank in [-1, 0]:
+      os.makedirs(args.output_dir)
 
-    from arguments import args 
-    main(args)
+  args.eval_batch_size = args.per_gpu_eval_batch_size * max(1, args.n_gpu)
 
+  eval_sampler = SequentialSampler(dataset)
+  eval_dataloader = DataLoader(dataset, sampler=eval_sampler, batch_size=args.eval_batch_size)
+
+  # multi-gpu evaluate
+  if args.n_gpu > 1 and not isinstance(model, torch.nn.DataParallel):
+      model = torch.nn.DataParallel(model)
+
+  # Eval!
+  logger.info("***** Running evaluation {} *****".format(prefix))
+  logger.info("  Num examples = %d", len(dataset))
+  logger.info("  Batch size = %d", args.eval_batch_size)
+
+  all_results = []
+  start_time = timeit.default_timer()
+
+  for batch in tqdm(eval_dataloader, desc="Evaluating"):
+      model.eval()
+      batch = tuple(t.to(args.device) for t in batch)
+
+      with torch.no_grad():
+          inputs = {
+              "input_ids": batch[0],
+              "attention_mask": batch[1],
+              "token_type_ids": batch[2],
+          }
+
+          if args.model_type in ["xlm", "roberta", "distilbert", "camembert"]:
+              del inputs["token_type_ids"]
+
+          feature_indices = batch[3]
+
+          # XLNet and XLM use more arguments for their predictions
+          if args.model_type in ["xlnet", "xlm"]:
+              inputs.update({"cls_index": batch[4], "p_mask": batch[5]})
+              # for lang_id-sensitive xlm models
+              if hasattr(model, "config") and hasattr(model.config, "lang2id"):
+                  inputs.update(
+                      {"langs": (torch.ones(batch[0].shape, dtype=torch.int64) * args.lang_id).to(args.device)}
+                  )
+          outputs = model(**inputs)
+
+      for i, feature_index in enumerate(feature_indices):
+          eval_feature = features[feature_index.item()]
+          unique_id = int(eval_feature.unique_id)
+
+          output = [to_list(output[i]) for output in outputs]
+
+          # Some models (XLNet, XLM) use 5 arguments for their predictions, while the other "simpler"
+          # models only use two.
+          if len(output) >= 5:
+              start_logits = output[0]
+              start_top_index = output[1]
+              end_logits = output[2]
+              end_top_index = output[3]
+              cls_logits = output[4]
+
+              result = SquadResult(
+                  unique_id,
+                  start_logits,
+                  end_logits,
+                  start_top_index=start_top_index,
+                  end_top_index=end_top_index,
+                  cls_logits=cls_logits,
+              )
+
+          else:
+              start_logits, end_logits = output
+              result = SquadResult(unique_id, start_logits, end_logits)
+
+          all_results.append(result)
+
+  evalTime = timeit.default_timer() - start_time
+  logger.info("  Evaluation done in total %f secs (%f sec per example)", evalTime, evalTime / len(dataset))
+
+  # Compute predictions
+  output_prediction_file = os.path.join(args.output_dir, "predictions_{}.json".format(prefix))
+  output_nbest_file = os.path.join(args.output_dir, "nbest_predictions_{}.json".format(prefix))
+
+  if args.version_2_with_negative:
+      output_null_log_odds_file = os.path.join(args.output_dir, "null_odds_{}.json".format(prefix))
+  else:
+      output_null_log_odds_file = None
+
+  # XLNet and XLM use a more complex post-processing procedure
+  if args.model_type in ["xlnet", "xlm"]:
+      start_n_top = model.config.start_n_top if hasattr(model, "config") else model.module.config.start_n_top
+      end_n_top = model.config.end_n_top if hasattr(model, "config") else model.module.config.end_n_top
+
+      predictions = compute_predictions_log_probs(
+          examples,
+          features,
+          all_results,
+          args.n_best_size,
+          args.max_answer_length,
+          output_prediction_file,
+          output_nbest_file,
+          output_null_log_odds_file,
+          start_n_top,
+          end_n_top,
+          args.version_2_with_negative,
+          tokenizer,
+          args.verbose_logging,
+      )
+  else:
+      predictions = compute_predictions_logits(
+          examples,
+          features,
+          all_results,
+          args.n_best_size,
+          args.max_answer_length,
+          args.do_lower_case,
+          output_prediction_file,
+          output_nbest_file,
+          output_null_log_odds_file,
+          args.verbose_logging,
+          args.version_2_with_negative,
+          args.null_score_diff_threshold,
+          tokenizer,
+      )
+
+  # Compute the F1 and exact scores.
+  results = squad_evaluate(examples, predictions)
+  return results

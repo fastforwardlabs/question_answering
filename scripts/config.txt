@@ -1,7 +1,7 @@
 # ================ [REQUIRED PARAMS] ================
 --model_type            distilbert     
---model_name_or_path    twmkn9/distilbert-base-uncased-squad2
---output_dir            /home/cdsw/models/distilbert
+--model_name_or_path    distilbert-base-uncased
+--output_dir            /home/cdsw/models/distilbert-base-uncased
 
 # ================ [DATA PARAMS] ================
 --data_dir      /home/cdsw/data/squad            # The input data dir -- should contain Q&A examples as .json files
@@ -31,7 +31,7 @@
 
 # ================ [EPOCHS / BATCHING / LOGGING] ================
 --num_train_epochs  1.0
---per_gpu_train_batch_size  64
+--per_gpu_train_batch_size  12
 --per_gpu_eval_batch_size   8
 --logging_steps 500
 --save_steps    500
