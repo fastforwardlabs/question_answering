@@ -12,12 +12,6 @@ import torch
 from qa.utils import *
 from qa.data.loader import load_and_cache_examples
 from qa.model_utils import load_pretrained_model, train_model
-
-
-#try:
-#    from torch.utils.tensorboard import SummaryWriter
-#except ImportError:
-#    from tensorboardX import SummaryWriter
     
 def main(args):
     

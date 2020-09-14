@@ -1,4 +1,5 @@
 import os
+import json
 import logging
 import numpy as np
 import timeit
@@ -25,6 +26,11 @@ from transformers.data.metrics.squad_metrics import (
 )
 
 from transformers.data.processors.squad import SquadResult
+
+try:
+    from torch.utils.tensorboard import SummaryWriter
+except ImportError:
+    from tensorboardX import SummaryWriter
 
 from qa.data.loader import load_and_cache_examples
 from qa.utils import to_list
@@ -54,9 +60,9 @@ def train_model(args, train_dataset, model, tokenizer):
 
     logger = logging.getLogger("Train.train_model")
 
-    # If not training on distributed GPUs, initliaze Summary Writer
-    #if args.local_rank in [-1, 0]:
-    #    tb_writer = SummaryWriter()
+    #If not training on distributed GPUs, initliaze Summary Writer
+    if args.local_rank in [-1, 0]:
+        tb_writer = SummaryWriter()
 
     # Determine batch size and total training steps
     args.train_batch_size = args.per_gpu_train_batch_size * max(1, args.n_gpu)
@@ -246,8 +252,8 @@ def train_model(args, train_dataset, model, tokenizer):
             train_iterator.close()
             break
 
-    #if args.local_rank in [-1, 0]:
-    #    tb_writer.close()
+    if args.local_rank in [-1, 0]:
+        tb_writer.close()
 
     return global_step, tr_loss / global_step
   
@@ -340,6 +346,7 @@ def evaluate_model(args, model, tokenizer, prefix=""):
   # Compute predictions
   output_prediction_file = os.path.join(args.output_dir, "predictions_{}.json".format(prefix))
   output_nbest_file = os.path.join(args.output_dir, "nbest_predictions_{}.json".format(prefix))
+  output_results_file = os.path.join(args.output_dir, "results_{}.json".format(prefix))
 
   if args.version_2_with_negative:
       output_null_log_odds_file = os.path.join(args.output_dir, "null_odds_{}.json".format(prefix))
@@ -385,4 +392,6 @@ def evaluate_model(args, model, tokenizer, prefix=""):
 
   # Compute the F1 and exact scores.
   results = squad_evaluate(examples, predictions)
+  json.dump(results, open(output_results_file, 'w'))
+  
   return results
