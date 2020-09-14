@@ -66,7 +66,7 @@ def main(args):
 if __name__ == "__main__":
     model_name = "twmkn9/distilbert-base-uncased-squad2"
 
-    from arguments import args 
+    from qa.arguments import args 
     
     if (
         os.path.exists(args.output_dir)

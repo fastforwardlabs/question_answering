@@ -1,11 +1,11 @@
 # ================ [REQUIRED PARAMS] ================
 --model_type            distilbert     
---model_name_or_path    distilbert-base-uncased
---output_dir            /home/cdsw/models/distilbert-base-uncased
+--model_name_or_path    twmkn9/distilbert-base-uncased-squad2
+--output_dir            /home/cdsw/data/predictions/twmkn9-distilbert-base-uncased-squad2
 
 # ================ [DATA PARAMS] ================
 --data_dir      /home/cdsw/data/squad            # The input data dir -- should contain Q&A examples as .json files
---train_file    mini_train-v2.0.json     # The input training file. If data_dir is specified, will look for the file there
+#--train_file    mini_train-v2.0.json     # The input training file. If data_dir is specified, will look for the file there
 --predict_file  dev-v2.0.json       # The input evaluation file. If data_dir is specified, will look for the file there
 #--verbose_logging                  # Uncomment this flag to print all warnings related to data processing 
 #--overwrite_output_dir             # Uncomment this flag to overwrite the content of the output directory

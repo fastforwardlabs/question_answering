@@ -57,5 +57,5 @@ def main(args):
   
   
 if __name__ == "__main__":
-  from arguments import args
+  from qa.arguments import args
   main(args)
