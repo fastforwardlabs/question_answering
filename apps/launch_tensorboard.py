@@ -1,0 +1,1 @@
+!tensorboard --logdir=/home/cdsw/runs --port=$CDSW_APP_PORT
