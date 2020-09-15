@@ -3,9 +3,11 @@ import logging
 
 import torch
 
+from qa.data.processing import SquadLikeProcessor
+
 from transformers.data.processors.squad import (
-    SquadV1Processor, 
-    SquadV2Processor, 
+    SquadV1Processor,
+    SquadV2Processor,
     squad_convert_examples_to_features
 )
 
@@ -19,10 +21,11 @@ def load_and_cache_examples(args, tokenizer, evaluate=False, output_examples=Fal
 
     # Load data features from cache or dataset file
     input_dir = args.data_dir if args.data_dir else "."
+    datafile_prefix = os.path.splitext(args.predict_file if evaluate else args.train_file)[0]
     cached_features_file = os.path.join(
       input_dir,
       "cached_{}_{}_{}".format(
-          "dev" if evaluate else "train",
+          datafile_prefix,
           list(filter(None, args.model_name_or_path.split("/"))).pop(),
           str(args.max_seq_length),
       ),
@@ -38,7 +41,7 @@ def load_and_cache_examples(args, tokenizer, evaluate=False, output_examples=Fal
           features_and_dataset["examples"],
         )
     else:
-        logger.info("Creating features from dataset file at %s", input_dir)
+        logger.info("Creating features from {} file at {}".format(datafile_prefix, input_dir))
 
         if not args.data_dir and ((evaluate and not args.predict_file) or (not evaluate and not args.train_file)):
             try:
@@ -52,11 +55,11 @@ def load_and_cache_examples(args, tokenizer, evaluate=False, output_examples=Fal
             tfds_examples = tfds.load("squad")
             examples = SquadV1Processor().get_examples_from_dataset(tfds_examples, evaluate=evaluate)
         else:
-            processor = SquadV2Processor() if args.version_2_with_negative else SquadV1Processor()
+            processor = SquadLikeProcessor()
             if evaluate:
-                examples = processor.get_dev_examples(args.data_dir, filename=args.predict_file)
+                examples = processor.get_dev_examples(args.data_dir, dev_file=args.predict_file)
             else:
-                examples = processor.get_train_examples(args.data_dir, filename=args.train_file)
+                examples = processor.get_train_examples(args.data_dir, train_file=args.train_file)
 
         features, dataset = squad_convert_examples_to_features(
           examples=examples,
