@@ -392,6 +392,7 @@ def evaluate_model(args, model, tokenizer, prefix=""):
 
   # Compute the F1 and exact scores.
   results = squad_evaluate(examples, predictions)
+  results['avg_time_per_example'] = evalTime / len(dataset)
   json.dump(results, open(output_results_file, 'w'))
   
   return results
