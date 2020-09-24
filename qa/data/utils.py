@@ -1,6 +1,7 @@
+import os
 import json
 import numpy as np
-import os
+import pandas as pd
 from qa.utils import set_seed
 
 def randomize_indices(data):
@@ -48,3 +49,20 @@ def create_increasing_sized_train_sets(json_data_file, sizes=None, **kwargs):
 
     new_json['data'][0]['paragraphs'] += chunk
     json.dump(new_json, open(f"{outfile_prefix}_{num_examples}.json", "w"))
+    
+    
+def load_results(data_dir):
+    data = json.load(open(data_dir+"/results_.json", "r"))
+    return pd.DataFrame(data, index=[0])
+
+def load_predictions(data_dir):
+    preds = json.load(open(data_dir+"/predictions_.json", 'r'))
+    return pd.Series(preds)
+  
+def load_nbest_predictions(data_dir):
+    """
+    I have not tested this and I have no idea if it works.
+    """
+    preds = json.load(open(data_dir+"/nbest_predictions_.json",'r'))
+    return pd.DataFrame(data, index=[0])
+
