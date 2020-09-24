@@ -15,7 +15,7 @@ def main(args):
   logger = initialize_logging(args, module='Eval')
 
   # Set seed
-  set_seed(args)
+  set_seed(args.seed)
   
   # Evaluation
   results = {}

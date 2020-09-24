@@ -211,6 +211,7 @@ args = parser.parse_args()
 
 
 if args.doc_stride >= args.max_seq_length - args.max_query_length:
+    # TODO: fix the logger here
     logger.warning(
         "WARNING - You've set a doc stride which may be superior to the document length in some "
         "examples. This could result in errors when building features from the examples. Please reduce the doc "

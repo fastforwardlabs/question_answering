@@ -22,7 +22,7 @@ def main(args):
     logger = initialize_logging(args, module='Train')
 
     # Set seed
-    set_seed(args)
+    set_seed(args.seed)
 
     # Make sure only the first process in distributed training will download model & vocab
     if args.local_rank not in [-1, 0]:

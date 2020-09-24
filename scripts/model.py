@@ -17,12 +17,12 @@ DEVICE = -1 # cpu only
 qa_model = pipeline('question-answering', 
                     model=DEFAULT_MODEL, 
                     tokenizer=DEFAULT_MODEL,
-                    device=-1)
+                    device=DEVICE)
   
   
 def question_answering(args):
   """
-  model API must adhere to
+  Model API for use with MLViz must adhere to the following schema:
   
   INPUT: 
   {
