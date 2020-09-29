@@ -1,7 +1,6 @@
 
-# This script is designed to be run using the Experiments or Jobs CDSW abstraction.
-# It performs the steps necessary to conduct an experiment in which a QA model
-# is trained on increasing-sized data from a specialized domain. [LINK TO BLOG POST]
+# This script is designed to be run using the Jobs abstraction.
+# This scripts trains a QA model on increasing-sized data from a specialized domain. [LINK TO BLOG POST]
 # 
 # It first creates subsets of the original dataset. These subsets contain an increasing
 # number of examples -- i.e., the first subset has only 500 examples, the second has 
@@ -18,19 +17,19 @@
 # The prediction and results outputs are saved to the output_dir designated 
 # in the config.txt
 
-# TODO: Make a config.txt specifically for this experiment
-
 from qa.data.utils import create_increasing_sized_train_sets
 
-original_dataset = "/Users/mbeck/Projects/ff14/data/medical/covid_bioasq_train.json"
-create_increasing_sized_train_sets(original_dataset)
+DEFAULT_SIZES = [500, 1000, 1500, 2000, 2500, 3000]
+MINI_SIZES = [5,10,15]
 
-for num in [500, 1000, 1500, 2000, 2500, 3000]:
-    !python scripts/train.py @scripts/config.txt \
-        --train_file covid_bioasq_train_{num}.json \
-        --output_dir models/deepset-minilm-uncased-squad2/med{num}/
+original_dataset = "/home/cdsw/data/medical/covid_bioasq_train.json"
+create_increasing_sized_train_sets(original_dataset, sizes=MINI_SIZES)
 
-    !python scripts/evaluate.py @scripts/config.txt \
-        --model_name_or_path models/deepset-minilm-uncased-squad2/med{num}/
-        --output_dir data/predictions/deepset-minilm-uncased-squad2/med{num}/
-
+for num in MINI_SIZES:
+  !python3 scripts/train.py @scripts/config_multi-train.txt \
+      --train_file covid_bioasq_train_{num}.json \
+      --output_dir models/deepset-bert-base-cased-squad2/medical_{num}/
+  
+  !python3 scripts/evaluate.py @scripts/config_multi-train.txt \
+      --model_name_or_path models/deepset-bert-base-cased-squad2/medical_{num}/ \
+      --output_dir data/predictions/deepset-bert-base-cased-squad2/medical_{num}/

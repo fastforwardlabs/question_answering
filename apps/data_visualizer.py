@@ -5,11 +5,11 @@ import altair as alt
 import matplotlib.pyplot as plt
 import json
 
-SQUAD_DIR = "/Users/mbeck/Projects/ff14/data/raw/squad/"
-MED_DIR = "/Users/mbeck/Projects/ff14/data/raw/covid/"
+#SQUAD_DIR = "/Users/mbeck/Projects/ff14/data/raw/squad/"
+#MED_DIR = "/Users/mbeck/Projects/ff14/data/raw/covid/"
 
-#SQUAD_DIR = "/home/cdsw/data/squad/"
-#MED_DIR = "/home/cdsw/data/covidQA/"
+SQUAD_DIR = "/home/cdsw/data/squad/"
+MED_DIR = "/home/cdsw/data/covidQA/"
 
 COLORS = ["#00828c", "#ff8300"]
 

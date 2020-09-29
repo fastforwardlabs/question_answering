@@ -1,20 +1,20 @@
 # ================ [REQUIRED PARAMS] ================
---model_type            distilbert          
---model_name_or_path    twmkn9/distilbert-base-uncased-squad2   
---output_dir            /home/cdsw/data/models/twmkn9-distilbert-base-uncased-squad2
+--model_type            bert          
+--model_name_or_path    deepset/bert-base-cased-squad2
+--output_dir            /home/cdsw/data/models/deepset-bert-base-cased-squad2
 
 # ================ [DATA PARAMS] ================
---data_dir      /home/cdsw/data/squad            # The input data dir -- should contain Q&A examples as .json files
---train_file    mini_train-v2.0.json     # The input training file. If data_dir is specified, will look for the file there
---predict_file  dev-v2.0.json       # The input evaluation file. If data_dir is specified, will look for the file there
+--data_dir      /home/cdsw/data/medical       # The input data dir -- should contain Q&A examples as .json files
+--train_file    covid_bioasqa_train.json      # The input training file. If data_dir is specified, will look for the file there
+--predict_file  covid_bioasq_dev.json         # The input evaluation file. If data_dir is specified, will look for the file there
 #--verbose_logging                  # Uncomment this flag to print all warnings related to data processing 
 #--overwrite_output_dir             # Uncomment this flag to overwrite the content of the output directory
---overwrite_cache                  # Uncomment this flag to overwrite the cached training and/or evaluation datasets
+#--overwrite_cache                  # Uncomment this flag to overwrite the cached training and/or evaluation datasets
 # TODO: CHANGE THE NAME OF THIS FLAG
---version_2_with_negative          # Uncomment this flag if working with examples wherein some do not have an answer 
+#--version_2_with_negative          # Uncomment this flag if working with examples wherein some do not have an answer 
 
 # ================ [OPTIONAL TRANSFORMER PARAMS] ================
---do_lower_case                    # Uncomment this flag if using an uncased model
+#--do_lower_case                    # Uncomment this flag if using an uncased model
 #--config_name                      # Specify name of a QA Model config file if loading from config (not common)
 #--tokenizer_name                   # Specify a tokenizer if named differently from model (not common)
 #--cache_dir                        # Directory for storing pre-trained models downloaded from the HF Model Repo; default is XXX
@@ -22,17 +22,17 @@
 
 # ================ [QA BEHAVIOR PARAMS] ================
 --max_seq_length        384         # The maximum total input sequence length after tokenization
---doc_stride            128         # Stride between segments when chunking long documents 
+--doc_stride            192         # Stride between segments when chunking long documents 
 --max_query_length      64          # Max number of tokens for the question
---max_answer_length     30          # Max number of tokens allowed for the answer
+--max_answer_length     148          # Max number of tokens allowed for the answer
 
 --null_score_diff_threshold 0.0
 --n_best_size   5                  # Number of top best predictions to generate for each question during evaluation 
 
 # ================ [EPOCHS / BATCHING / LOGGING -- MOSTLY ONLY FOR TRAINING] ================
 --num_train_epochs  2.0
---per_gpu_train_batch_size  16
---per_gpu_eval_batch_size   16      # If evaluating with a GPU - set the evaluation batch size
+--per_gpu_train_batch_size  8
+--per_gpu_eval_batch_size   8      # If evaluating with a GPU - set the evaluation batch size
 --logging_steps 500
 --save_steps    -1
 --warmup_steps  0

@@ -4,6 +4,8 @@ import numpy as np
 import pandas as pd
 from qa.utils import set_seed
 
+DEFAULT_SIZES = [500, 1000, 1500, 2000, 2500, 3000]
+
 def randomize_indices(data):
   idx = np.arange(len(data))
   return np.random.permutation(idx)
@@ -22,7 +24,7 @@ def partition_data(data, indices_or_sections=None, seed=42):
   partitions = [list(dd[chunk]) for chunk in idx_chunks]
   return partitions
 
-def create_increasing_sized_train_sets(json_data_file, sizes=None, **kwargs):
+def create_increasing_sized_train_sets(json_data_file, sizes=DEFAULT_SIZES, **kwargs):
   """
   json_data_file: filename of the original, full dataset from which to create subsets
   sizes: list of dataset sizes to partition the original dataset into
@@ -37,8 +39,7 @@ def create_increasing_sized_train_sets(json_data_file, sizes=None, **kwargs):
   outfile_prefix = os.path.splitext(json_data_file)[0]
   json_data = json.load(open(json_data_file, 'r'))
 
-  data_chunks = partition_data(json_data['data'][0]['paragraphs'], 
-                               [500, 1000, 1500, 2000, 2500, 3000], **kwargs)
+  data_chunks = partition_data(json_data['data'][0]['paragraphs'], sizes, **kwargs)
   
   new_json = {'data':[{'paragraphs':[]}]}
   for chunk in data_chunks:
