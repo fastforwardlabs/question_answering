@@ -32,4 +32,5 @@ for num in MINI_SIZES:
   
   !python3 scripts/evaluate.py @scripts/config_multi-train.txt \
       --model_name_or_path models/deepset-bert-base-cased-squad2/medical_{num}/ \
-      --output_dir data/predictions/deepset-bert-base-cased-squad2/medical_{num}/
+      --output_dir data/predictions/deepset-bert-base-cased-squad2/medical_{num}/ \
+      --predict_file covid_bioasq_train_{num}.json

@@ -14,10 +14,10 @@
 --version_2_with_negative          # Uncomment this flag if working with examples wherein some do not have an answer 
 
 # ================ [OPTIONAL TRANSFORMER PARAMS] ================
---do_lower_case                    # Uncomment this flag if using an uncased model
-#--config_name                      # Specify name of a QA Model config file if loading from config (not common)
-#--tokenizer_name                   # Specify a tokenizer if named differently from model (not common)
-#--cache_dir                        # Directory for storing pre-trained models downloaded from the HF Model Repo; default is XXX
+--do_lower_case                           # Uncomment this flag if using an uncased model
+#--config_name                            # Specify name of a QA Model config file if loading from config (not common)
+#--tokenizer_name                         # Specify a tokenizer if named differently from model (not common)
+#--cache_dir    /home/cdsw/models/cache   # Directory for storing pre-trained models downloaded from the HF Model Repo; default is XXX
 --lang_id   0                       # 0 is English
 
 # ================ [QA BEHAVIOR PARAMS] ================
