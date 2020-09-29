@@ -70,6 +70,7 @@ use_full_text = st.sidebar.checkbox(
     "Use full text rather than summaries of Wikipedia pages (slower but better answers)"
 )
 
+# ------ BEGIN APP ------ 
 st.title("Question Answering with ")
 response = requests.get("https://upload.wikimedia.org/wikipedia/commons/5/53/Wikipedia-logo-en-big.png")
 st.image(Image.open(BytesIO(response.content)), width=400)
@@ -89,34 +90,40 @@ st.markdown("A question entered below will first be used in Wikipedia's default 
     However you can choose to use the full text of the article in the sidebar. This usually provides \
     better results, though it does take longer to process.")
 
-# LOAD MODEL
+# ------ LOAD QA MODEL ------ 
 reader = load_model(model_choice)
 
-# Get question
+# ------ GET QUESTION ------ 
 st.markdown("## Ask a question")
 query = st.text_input('Enter text here', 'Why is the sky blue?')
 st.markdown(f"## Displaying the top {number_of_pages} results:")
 
-# Wiki search
+# ------ SEARCH ENGINE (RETRIEVER) ------ 
 results = wiki.search(query, results=number_of_pages)
+
+# ------ ANSWER EXTRACTION (READER) ------ 
 for i, result in enumerate(results):
     wiki_page = wiki.page(result, auto_suggest=False)
 
+    # display the Wiki title as a URL
     title_url = make_url(result, wiki_page.url)
     st.markdown("### "+ str(i+1)+') '+title_url, unsafe_allow_html=True)
 
+    # grab text for answer extraction
     if use_full_text:
         context = wiki_page.content
     else:
         context = wiki_page.summary
+        
+    # extract answers
     inputs = {'question':query, 'context':context}
     answers = reader(inputs, **{'topk':number_of_answers})
-
     try: 
         answerdf = pd.DataFrame(answers)
     except: 
         answerdf = pd.DataFrame(answers, index=[0]) 
 
+    # display results
     hilite_context = highlight_text(answerdf['answer'][0], context, full_text=use_full_text)
     st.markdown(hilite_context, unsafe_allow_html=True)
 
