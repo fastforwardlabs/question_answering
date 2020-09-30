@@ -144,8 +144,8 @@ def plot_selection(stats, SELECTION, dataset=None):
   altair_chart = st.altair_chart(chart, use_container_width=True)
 
 
-# Start the App
-st.title("Visualizing data for Question Answering")
+# ----------- START THE APP -----------
+st.title("QA Data Visualizer")
 st.write("Question answering applications seem to work like magic, providing \
           answers when given raw blocks of text and a corresponding question. \
           However, training and evaluating these systems requires highly \
@@ -184,8 +184,8 @@ st.json({
     ],
   })
 
-st.markdown("Each dataset has minor variations on this theme; the specifics \
-            can be explored in the optional tutorials provided after choosing a dataset.")
+st.markdown("QA datasets can have minor variations on this theme; details \
+            can be explored for the SQuAD2.0 dataset as an optional tutorial below.")
 
 DATASETS = st.multiselect("Choose one or more datasets to explore", 
                             ['SQuAD2.0','Medical Research'])
@@ -198,11 +198,12 @@ for dataset in DATASETS:
   data, stats = load_data(dataset, "train")
   datadict[dataset] = data
   statsdict[dataset] = stats
-  tutorials[dataset] = st.checkbox(f"Walk me through the {dataset} JSON schema tutorial.") 
-
+  if dataset == 'SQuAD2.0':
+    tutorials[dataset] = st.checkbox(f"Walk me through the {dataset} JSON schema tutorial.") 
+  
 ### Show selected tutorials if desired
 for dataset,to_run in tutorials.items():
-  if to_run: 
+  if to_run and (dataset == 'SQuAD2.0'): 
     st.header("Explore the JSON Schema")
     run_tutorial(dataset, datadict[dataset]) 
 

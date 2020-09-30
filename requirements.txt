@@ -1,6 +1,8 @@
-pip install torch==1.6.0+cpu torchvision==0.7.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
+torch==1.6.0+cpu 
+torchvision==0.7.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
 transformers==2.11.0
-tensorboardX
-tensorboard
-streamlit
+tensorboardX==2.1
+tensorboard==2.3.0
+streamlit==0.66.0
 wikipedia==1.4.0
+-e . # installs local qa package in "edit" mode

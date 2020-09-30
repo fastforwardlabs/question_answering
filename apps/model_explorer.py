@@ -14,9 +14,8 @@ from qa.data.processing import SquadLikeProcessor
 plt.style.use('fivethirtyeight')
 COLORS = ["#00828c", "#ff8300"]
 
-PREDICTION_DIR = "/Users/mbeck/Projects/cdsw-qa/question_answering/data/predictions/"
-MODEL_DIR = "/Users/mbeck/Projects/cdsw-qa/question_answering/models/"
-DATA_DIR = "/Users/mbeck/Projects/ff14/data/raw/squad/"
+PREDICTION_DIR = "/home/cdsw/data/predictions/"
+DATA_DIR = "/home/cdsw/data/squad/"
 
 PREDICTION_OPTIONS = {
     "BERT":         "deepset-bert-base-cased-squad2",
@@ -34,14 +33,6 @@ PLOT_OPTIONS = {
     "Exact Match (unanswerable questions)": "NoAns_exact",
     "F1 (unanswerable questions)": 'NoAns_f1'
 }
-
-MODEL_OPTIONS = {
-    "BERT":         "deepset/bert-base-cased-squad2",
-    "RoBERTa":      MODEL_DIR+"my-roberta-base-squad2", # local model
-    "DistilBERT":   "twmkn9/distilbert-base-uncased-squad2",
-    "MiniLM":       "deepset/minilm-uncased-squad2",
-    "XLM-RoBERTa":  "deepset/xlm-roberta-large-squad2"
-    }
 
 EXAMPLE_OPTIONS = {
     "What theory least best describes gravity?": "5ad28035d7d075001a4297a6",
@@ -136,8 +127,15 @@ def load_squad_example(idx, squad_validation_set):
     return question, context, answers
 
 
+# ------------ START THE APP ------------
 st.title("QA Model Explorer")
-st.markdown("What do I want to show here? ")
+st.markdown("In this mini app we'll explore the performance of various question answering\
+    models; both quantitatively and qualitatively. In a quantitative analysis, we can compare\
+    how models perform on top-level metrics across a validation set. But it's not just about\
+    how well a model answers questions, on average. Another important factor is the inference\
+    time for a model -- and you'll see that not all models are created equal. Finally, we can \
+    examine the qualitative performance by looking at how different models answer the same \
+    question -- sometimes in drastically different ways!")
 
 st.header("Comparing model performance: Quantitative")
 st.markdown("Which model should you choose for your application? That will \
@@ -149,15 +147,15 @@ st.markdown("We evaluated several QA models against the SQuAD2.0 validation set.
     The SQuAD2.0 validation set contains nearly 12,000 \
     examples; about half of them are _answerable_ -- the answer can be found \
     in the context. The other half are impossible to answer, given the context.\
-    (Read more about the purpose of unanswerable questions in \
-    [THIS BLOG I WROTE](https://qa.fastforwardlabs.com/no%20answer/null%20threshold/bert/distilbert/exact%20match/f1/robust%20predictions/2020/06/09/Evaluating_BERT_on_SQuAD.html) \
-    You can explore results for all examples, just the _answerable_ ones, or\
-    just the _unanswerable_ ones.")
+    (Read more about the purpose of unanswerable questions in the accompanying\
+    [blog post](https://qa.fastforwardlabs.com/no%20answer/null%20threshold/bert/distilbert/exact%20match/f1/robust%20predictions/2020/06/09/Evaluating_BERT_on_SQuAD.html).) \
+    Below, you can explore results for all examples, \
+    just the _answerable_ ones, or just the _unanswerable_ ones.")
 
 all_results = load_all_results(PREDICTION_OPTIONS)
 
-plot_selection = st.selectbox("Select a quantity to view", 
-                                [k for k,v in PLOT_OPTIONS.items()])
+plot_selection = st.selectbox("Select a quantity to view", list(PLOT_OPTIONS.keys()))
+st.write(plot_selection)
 
 plot_results(plot_selection)
 
@@ -180,21 +178,23 @@ st.latex(r'''
 
 
 st.header("Comparing model performance: Qualitative")
-st.markdown("Select a model and some canned question/context pairs and see for yourself")
+st.markdown("Below you can choose from several examples in the SQuAD2.0 validation set \
+    and see how each model answered that question. Sometimes all the models agree but that \
+    is certainly not always the case! To examine the models' output from a random\
+    example, select `I'm feeling lucky`.")
 
 model_predictions = load_all_predictions(PREDICTION_OPTIONS)
 squad_validation_set, qid_to_idx, idx_to_qid = load_squad_validation_set()
 
-question_selection = st.selectbox("Choose an example", 
-                                  [k for k,v in EXAMPLE_OPTIONS.items()])
+question_selection = st.selectbox("Choose an example",list(EXAMPLE_OPTIONS.keys()))
 qid = EXAMPLE_OPTIONS[question_selection]
 
 if qid == "I'm feeling lucky":
     idx = np.random.randint(0,len(squad_validation_set)-1, 1)[0]
-    question, context, answers = load_squad_example(idx, squad_validation_set)
 else:
     idx = qid_to_idx[qid]
-    question, context, answers = load_squad_example(idx, squad_validation_set) 
+
+question, context, answers = load_squad_example(idx, squad_validation_set) 
 
 st.markdown("### Question")
 st.markdown(question)
@@ -212,8 +212,5 @@ if answers:
 else:
     st.write("This question is impossible to answer given the context!")                             
 
-#model_selection = st.selectbox("Choose a model to load", 
-#                                [k for k,v in MODEL_OPTIONS.items()])
-#qa = load_qa_model(model_selection)
 
 

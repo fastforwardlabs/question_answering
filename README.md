@@ -4,33 +4,37 @@ more user friendly for the Cloudera CDSW/CML platforms. This repo focuses primar
 methods for QA Models, including apps that allow you to explore QA data, compare pre-trained QA models, 
 and perform basic QA interactions with a trained model. This repo does not include methods for pairing the 
 QA Model with a search engine to make a full Information-Retrieval Question Answering Pipeline as discussed in 
-our accompanying blog series. For a demonstration of that, see NeuralQA. 
+our accompanying [blog series](https://qa.fastforwardlabs.com/). For a demonstration of that, see [NeuralQA](https://neuralqa.fastforwardlabs.com/#/). 
 
 Datasets: 
-* SQuAD2.0 (LINK)
-* COVID-QA (LINK)
-* BioASQ (Registration required) (LINK) 
+* [SQuAD2.0](https://rajpurkar.github.io/SQuAD-explorer/) 
+* [COVID-QA](https://github.com/deepset-ai/COVID-QA) 
+* [BioASQ](http://www.bioasq.org/) (Registration is required to use their data; 
+we used a post-processed version that can be found [here](https://mrqa.github.io/shared)) 
 
 ## Things you can do in this CML Prototype
-* train a QA model on domain specific / specialized training data using the Jobs abstraction
-* evaluate a QA model on a validation set
-* expose and serve a QA model using the Model abstraction (i.e. for use in an MLViz application)
-* explore training and evaluation data: including the required JSON schema, types of questions, 
+* **train** a QA model on domain specific / specialized training data using the Jobs abstraction
+* **evaluate** a QA model on a validation set
+* **expose** and **serve** a QA model using the Model abstraction 
+* **explore** training and evaluation data, including the required JSON schema, types of questions, 
   lengths of passages, and more
-* explore performance of several popular models that have already been trained for question answering 
+* **explore** performance of several popular models that have already been trained for question answering 
   (BERT, RoBERTa, DistilBERT, MiniLM, XLM-RoBERTa)
-* examine the training process through a TensorBoard application
+* **examine** the training process through a TensorBoard application
+* **launch** your own Question Answering application on Wikipedia
 
 ## Set up
--- install requirements.txt (once I make one)
--- add qa package to requirements.txt
+`!pip3 install -r requirements.txt`
 
+This will install required packages including the local `qa` package.
 
-## Apps
-* MLViz (broken) I had an example of how QAModel could connect to the MLViz app but now it's not working. Sad. 
-* tensorboard (available if a training session has been executed)
-* QA Data Visualizer
-* QA Model Explorer
+## Applications
+Several applications are included in this demo: 
+
+* WikiQA is a question answering demo where you can ask questions of Wikipedia articles 
+* QA Data Visualizer allows you to explore the structure and distribution of question-answering data
+* QA Model Explorer allows you to examine the performance of different question answering models
+* TensorBoard is available as an Application if a model training session has been executed
 
 
 # How to do stuff
@@ -54,19 +58,20 @@ The first three arguments in `config.txt` are required so we describe them brief
   * A string with the _identifier_ name of a pretrained model to load from cache or download from the 
   [HF model repository](https://huggingface.co/models), e.g., "bert-base-uncased" or "deepset/bert-base-cased-squad2"
   * A path to a directory containing model weights, e.g., /home/cdsw/models/my_model_directory/
-* `--output_dir`: path of directory to store trained model weights (if training) or predictions and performance results (if evaluating)```
+* `--output_dir`: path of directory to store trained model weights (if training) or predictions and performance results (if evaluating)
 
 
-Note: The first time an _identifier_ name is called, those model weights will be downloaded and cached from the HF model repo. 
+Note: The first time an identifier name is called, those model weights will be downloaded and cached from the HF model repo. 
 This can take a long time and a lot of disk space for large models. Additional calls to that particular model name will load 
 model weights from the cache.
 
-Note: When training or evaluating models, you must have an Engine Profile with a minimum of 2 vCPU / 16 GiB. 
+Note: When training or evaluating models, you must use an Engine Profile with a minimum of 2 vCPU / 16 GiB. 
 Any less and the session / job will fail due to memory constraints. A GPU is _strongly_ preferred for these tasks!
 
-Note:  Setting the `--train-file` flag after the config file overrides the config file. 
-This is useful if you want to programmatically train on many datasets in succession. 
-This overriding-the-config-behavior works for any of the config parameters. 
+Note:  Adding an argument (e.g. `--train-file  my_training_file.json`) after the call to the config file 
+will override the value for that argument in the config file. 
+This is useful if you want to programmatically train or evaluate on many datasets in succession. 
+See an example of this in `scripts/multi-train.py`. 
 
 -------------------------
 
@@ -103,9 +108,5 @@ Select `scripts/model.py` under the **Script** field in the Create a Model menu.
 -------------------------
 
 ## To Do 
-- [] provide a bit more functionality to the `models.py` script
-- [x] fix the data fetching 
-- [] document code
-- [x] make the README not bad
-- [x] make model_explorer launch script
+- [] provide more functionality to the `models.py` script
 - [] add the medical data to be cloned with the repo? 
