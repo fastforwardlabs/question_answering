@@ -29,7 +29,7 @@ tasks:
 
   - type: create_model
     name: Create QA Model API Endpoint
-    entity_label: QA_model
+    entity_label: qa_model
     description: This model api endpoint predicts QA
     short_summary: Create the QA model prediction api endpoint
     access_key_environment_variable: SHTM_ACCESS_KEY
@@ -42,7 +42,7 @@ tasks:
   
   - type: build_model
     name: Build QA Model Endpoint
-    entity_label: QA_model
+    entity_label: qa_model
     comment: Build QA model
     examples:
       - request: ''
