@@ -62,3 +62,6 @@ tasks:
     environment_variables:
       TASK_TYPE: START_APPLICATION
     kernel: python3
+    default_resources:
+       cpu: 1
+       memory: 4
