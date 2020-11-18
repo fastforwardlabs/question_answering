@@ -1,4 +1,4 @@
-zname: Question Answering
+name: Question Answering
 description: Prototype to question answering with neural networks
 author: Cloudera Engineer
 specification_version: 1.0
