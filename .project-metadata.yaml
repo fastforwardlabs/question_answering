@@ -1,0 +1,64 @@
+zname: Question Answering
+description: Prototype to question answering with neural networks
+author: Cloudera Engineer
+specification_version: 1.0
+prototype_version: 1.0
+date: "2020-11-18"
+api_version: 1
+
+ 
+
+tasks:
+  - type: create_job
+    name: Install dependencies
+    entity_label: install_deps
+    script: cml/install_dependencies.py
+    arguments: None
+    short_summary: Job to install dependencies and download training data.
+    cpu: 2
+    memory: 4
+    environment:
+      TASK_TYPE: CREATE/RUN_JOB
+    kernel: python3
+
+  - type: run_job
+    entity_label: install_deps
+    short_summary: Running install dependencies training job.
+    long_summary: >-
+      Running the job to install dependencies.
+
+  - type: create_model
+    name: Create QA Model API Endpoint
+    entity_label: QA_model
+    description: This model api endpoint predicts QA
+    short_summary: Create the QA model prediction api endpoint
+    access_key_environment_variable: SHTM_ACCESS_KEY
+    # default_resources:
+    #   cpu: 1
+    #   memory: 2
+    default_replication_policy:
+      type: fixed
+      num_replicas: 1
+  
+  - type: build_model
+    name: Build QA Model Endpoint
+    entity_label: QA_model
+    comment: Build QA model
+    examples:
+      - request: ''
+        response: ""
+    target_file_path: scripts/model.py
+    target_function_name: question_answering
+    kernel: python3
+    environment_variables:
+      TASK_TYPE: CREATE/BUILD/DEPLOY_MODEL
+
+
+
+  - type: start_application
+    name: Application to serve QA Streamlit App UI
+    subdomain: qamodel
+    script: apps/launch_wikiqa.py
+    environment_variables:
+      TASK_TYPE: START_APPLICATION
+    kernel: python3
