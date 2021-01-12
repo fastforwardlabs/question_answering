@@ -40,10 +40,12 @@
 
 import logging
 import os 
+import pathlib
 import random
-import numpy as np
 
+import numpy as np
 import torch
+
 
 def set_seed(seed):
     random.seed(seed)
@@ -91,5 +93,26 @@ def initialize_logging(args, module):
     
     return logger
 
-  
+
+def create_path(pathname):
+    """Creates the directory for the given path if it doesn't already exist."""
+    dir = str(pathlib.Path(pathname).parent)
+    if not os.path.exists(dir):
+        os.makedirs(dir)
+
+
+def absolute_path(*paths):
+    """Given a path relative to this project's top-level directory, returns the
+    full path in the OS.
+    Args:
+        paths: A list of folders/files.  These will be joined in order with "/"
+            or "\" depending on platform.
+    Returns:
+        The full absolute path in the OS.
+    """
+    # First parent gets the scripts directory, and the second gets the top-level.
+    result_path = pathlib.Path(__file__).resolve().parent.parent
+    for path in paths:
+        result_path /= path
+    return str(result_path)
   
