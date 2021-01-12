@@ -75,6 +75,13 @@ except ImportError:
 from qa.data.loader import load_and_cache_examples
 from qa.utils import to_list
 
+
+def load_model(model_name_or_path):
+    tokenizer = AutoTokenizer.from_pretrained(model_name_or_path)
+    model = pipeline('question-answering', model=model_name_or_path, tokenizer=tokenizer)
+    return model
+
+
 def load_pretrained_model(args):
     args.model_type = args.model_type.lower()
     config = AutoConfig.from_pretrained(
