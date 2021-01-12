@@ -76,10 +76,10 @@ from qa.data.loader import load_and_cache_examples
 from qa.utils import to_list
 
 
-def load_model(model_name_or_path):
+def load_model_and_tokenizer(model_name_or_path):
     tokenizer = AutoTokenizer.from_pretrained(model_name_or_path)
-    model = pipeline('question-answering', model=model_name_or_path, tokenizer=tokenizer)
-    return model
+    model = AutoModelForQuestionAnswering.from_pretrained(model_name_or_path) 
+    return model, tokenizer
 
 
 def load_pretrained_model(args):
