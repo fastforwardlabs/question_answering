@@ -13,8 +13,8 @@ tasks:
     script: cml/install_dependencies.py
     arguments: None
     short_summary: Create job to install dependencies.
-    cpu: 2
-    memory: 4
+    cpu: 1
+    memory: 8
     environment:
       TASK_TYPE: CREATE/RUN_JOB
     kernel: python3
@@ -30,8 +30,8 @@ tasks:
     arguments: None
     short_summary: Create job to download data and models. 
     long_summary: Create job to download SQUAD2.0 data and 5 pre-trained transformer models required by the Applications. SQUAD2 data is downloaded to the /data/squad subdirectory. Transformer models are cached to a hidden directory and are never accessed directly.  
-    cpu: 2
-    memory: 4
+    cpu: 1
+    memory: 8
     environment:
       TASK_TYPE: CREATE/RUN_JOB
     kernel: python3
@@ -49,7 +49,7 @@ tasks:
     kernel: python3
     default_resources:
        cpu: 2
-       memory: 4
+       memory: 8
 
   - type: start_application
     name: QA Model Explorer
