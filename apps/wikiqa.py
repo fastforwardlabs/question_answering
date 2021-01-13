@@ -42,8 +42,7 @@ import streamlit as st
 import wikipedia as wiki
 import pandas as pd
 from PIL import Image
-import requests
-from io import BytesIO
+from qa.utils import absolute_path
 from transformers import (
     pipeline, 
     AutoModelForQuestionAnswering,
@@ -112,8 +111,8 @@ use_full_text = st.sidebar.checkbox(
 
 # ------ BEGIN APP ------ 
 st.title("Question Answering with ")
-response = requests.get("https://upload.wikimedia.org/wikipedia/commons/5/53/Wikipedia-logo-en-big.png")
-st.image(Image.open(BytesIO(response.content)), width=400)
+image = absolute_path("images/669px-Wikipedia-logo-v2-en.svg.png")
+st.image(Image.open(image), width=400) 
 
 st.markdown("This app demonstrates how to build a simple question answering system on Wikipedia. \
     You can choose one of five Transformer models that have already been trained for extractive \
