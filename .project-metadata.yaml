@@ -1,20 +1,18 @@
 name: Question Answering
-description: Prototype to question answering with neural networks
-author: Cloudera Engineer
+description: Automated question answering applications using Transformer neural networks
+author: Cloudera Inc.
 specification_version: 1.0
 prototype_version: 1.0
-date: "2020-11-18"
+date: "2020-01-12"
 api_version: 1
-
- 
 
 tasks:
   - type: create_job
     name: Install dependencies
-    entity_label: install_deps
+    entity_label: install_dependencies
     script: cml/install_dependencies.py
     arguments: None
-    short_summary: Job to install dependencies and download training data.
+    short_summary: Create job to install dependencies.
     cpu: 2
     memory: 4
     environment:
@@ -22,46 +20,55 @@ tasks:
     kernel: python3
 
   - type: run_job
-    entity_label: install_deps
-    short_summary: Running install dependencies training job.
-    long_summary: >-
-      Running the job to install dependencies.
+    entity_label: install_dependencies
+    short_summary: Running install dependencies job. 
 
-  - type: create_model
-    name: Create QA Model API Endpoint
-    entity_label: qa_model
-    description: This model api endpoint predicts QA
-    short_summary: Create the QA model prediction api endpoint
-    access_key_environment_variable: SHTM_ACCESS_KEY
-    # default_resources:
-    #   cpu: 1
-    #   memory: 2
-    default_replication_policy:
-      type: fixed
-      num_replicas: 1
-  
-  - type: build_model
-    name: Build QA Model Endpoint
-    entity_label: qa_model
-    comment: Build QA model
-    examples:
-      - request: ''
-        response: ""
-    target_file_path: scripts/model.py
-    target_function_name: question_answering
+  - type: create_job
+    name: Download Data and Models
+    entity_label: download_data_and_models
+    script: cml/download_data_and_models.py
+    arguments: None
+    short_summary: Create job to download data and models. 
+    long_summary: Create job to download SQUAD2.0 data and 5 pre-trained transformer models required by the Applications. SQUAD2 data is downloaded to the /data/squad subdirectory. Transformer models are cached to a hidden directory and are never accessed directly.  
+    cpu: 2
+    memory: 4
+    environment:
+      TASK_TYPE: CREATE/RUN_JOB
     kernel: python3
-    environment_variables:
-      TASK_TYPE: CREATE/BUILD/DEPLOY_MODEL
 
-
+  - type: run_job
+    entity_label: download_data_and_models
+    short_summary: Run job to download data and models.  
 
   - type: start_application
-    name: Application to serve QA Streamlit App UI
-    subdomain: qamodel
+    name: WikiQA
+    subdomain: wikiqa
     script: apps/launch_wikiqa.py
     environment_variables:
       TASK_TYPE: START_APPLICATION
     kernel: python3
     default_resources:
-       cpu: 1
+       cpu: 2
        memory: 4
+
+  - type: start_application
+    name: QA Model Explorer
+    subdomain: modelexplorer
+    script: apps/launch_model_explorer.py
+    environment_variables:
+      TASK_TYPE: START_APPLICATION
+    kernel: python3
+    default_resources:
+       cpu: 1
+       memory: 1
+
+  - type: start_application
+    name: QA Data Explorer
+    subdomain: dataexplorer
+    script: apps/launch_data_visualizer.py
+    environment_variables:
+      TASK_TYPE: START_APPLICATION
+    kernel: python3
+    default_resources:
+       cpu: 1
+       memory: 1
