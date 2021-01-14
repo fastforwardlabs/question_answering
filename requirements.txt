@@ -5,4 +5,5 @@ tensorboardX==2.1
 tensorboard==2.3.0
 streamlit==0.66.0
 wikipedia==1.4.0
+rank_bm25==0.2.1
 -e . # installs local qa package in "edit" mode

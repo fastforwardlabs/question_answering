@@ -48,18 +48,18 @@ import json
 from transformers import pipeline, AutoModelForQuestionAnswering, AutoTokenizer
 
 from qa.data.processing import SquadLikeProcessor
-
+from qa.utils import absolute_path
 
 # Plotting defaults
 plt.style.use('fivethirtyeight')
 COLORS = ["#00828c", "#ff8300"]
 
-PREDICTION_DIR = "/home/cdsw/data/predictions/"
-DATA_DIR = "/home/cdsw/data/squad/"
+PREDICTION_DIR = "data/predictions/"
+DATA_DIR = "data/squad/"
 
 PREDICTION_OPTIONS = {
     "BERT":         "deepset-bert-base-cased-squad2",
-    "RoBERTa":      "my-roberta-base-squad2", 
+    "RoBERTa":      "mbeck-roberta-base-squad2", 
     "DistilBERT":   "twmkn9-distilbert-base-uncased-squad2",
     "MiniLM":       "deepset-minilm-uncased-squad2/",
     "XLM-RoBERTa":  "deepset-xlm-roberta-large-squad2",   
@@ -85,7 +85,7 @@ EXAMPLE_OPTIONS = {
 }
 
 def load_results(data_dir):
-    data = json.load(open(data_dir+"/results_.json", "r"))
+    data = json.load(open(absolute_path(data_dir, "results_.json"), "r"))
     return pd.DataFrame(data, index=[0])
 
 def load_all_results(prediction_dict):
@@ -99,7 +99,7 @@ def load_all_results(prediction_dict):
     return df
 
 def load_predictions(data_dir):
-    preds = json.load(open(data_dir+"/predictions_.json", 'r'))
+    preds = json.load(open(absolute_path(data_dir, "predictions_.json"), 'r'))
     return pd.Series(preds)
 
 def load_all_predictions(prediction_dict):
@@ -169,29 +169,29 @@ def load_squad_example(idx, squad_validation_set):
 
 # ------------ START THE APP ------------
 st.title("QA Model Explorer")
-st.markdown("In this mini app we'll explore the performance of various question answering\
-    models; both quantitatively and qualitatively. In a quantitative analysis, we can compare\
-    how models perform on top-level metrics across a validation set. But it's not just about\
-    how well a model answers questions, on average. Another important factor is the inference\
-    time for a model -- and you'll see that not all models are created equal. Finally, we can \
-    examine the qualitative performance by looking at how different models answer the same \
-    question -- sometimes in drastically different ways!")
+st.markdown("#### \"Which model should I choose for my application?\"")
+st.markdown("We get this question a lot and the answer depends on several factors \
+    including the performance of the model on a validation set, the inference time \
+    of the model, and memory constraints, among other considerations. This mini app \
+    seeks to help you answer some of those questions by \
+    considering both quantitative and qualitative model performance.")
 
-st.header("Comparing model performance: Quantitative")
-st.markdown("Which model should you choose for your application? That will \
-    depend on several factors including the performance of the model on a \
-    validation set, the inference time of the model, and memory constraints, among other considerations. \
-    Here we'll explore the first two: validation results and inference time.")
-       
-st.markdown("We evaluated several QA models against the SQuAD2.0 validation set. \
-    The SQuAD2.0 validation set contains nearly 12,000 \
-    examples; about half of them are _answerable_ -- the answer can be found \
-    in the context. The other half are impossible to answer, given the context.\
-    (Read more about the purpose of unanswerable questions in the accompanying\
-    [blog post](https://qa.fastforwardlabs.com/no%20answer/null%20threshold/bert/distilbert/exact%20match/f1/robust%20predictions/2020/06/09/Evaluating_BERT_on_SQuAD.html).) \
-    Below, you can explore results for all examples, \
-    just the _answerable_ ones, or just the _unanswerable_ ones.")
+st.markdown("Our quantitative analysis compares model performance on top-level metrics \
+    across a validation set, as well as inference times for those same models. \
+    Some models perform exceptionally well but come with a very high computational cost. \
+    Our qualitative analysis allows you to inspect how each candidate QA model answers \
+    the same question -- sometimes in drastically different ways!")
 
+st.header("Quantitative comparison")       
+st.markdown("We evaluated several QA models against the SQuAD2.0 validation set, which \
+    contains nearly 12,000 examples. About half of them are _answerable_ -- the answer \
+    can be found in the context. The other half are impossible to answer, given the context.\
+    (Read more about the purpose of unanswerable questions in our \
+    [blog post](https://qa.fastforwardlabs.com/no%20answer/null%20threshold/bert/distilbert/exact%20match/f1/robust%20predictions/2020/06/09/Evaluating_BERT_on_SQuAD.html).)")
+
+st.markdown("Below you can compare the average F1 and Exact Match scores for each model \
+    (teal bars), as well as the average inference time (orange bars), for all examples \
+    in the validation set,  just the _answerable_ ones, or just the _unanswerable_ ones.")
 all_results = load_all_results(PREDICTION_OPTIONS)
 
 plot_selection = st.selectbox("Select a quantity to view", list(PLOT_OPTIONS.keys()))
@@ -217,10 +217,13 @@ st.latex(r'''
 ''')
 
 
-st.header("Comparing model performance: Qualitative")
+st.header("Qualitative Comparison")
+st.markdown("A high average F1 score is usually a good sign of quality answers but it's\
+    also worth inspecting these answers for consistency, meaning, and intention. This type \
+    of qualitative analysis can help you better understand the strengths and shortcomings of your model.")
 st.markdown("Below you can choose from several examples in the SQuAD2.0 validation set \
-    and see how each model answered that question. Sometimes all the models agree but that \
-    is certainly not always the case! To examine the models' output from a random\
+    and see how each model answered that question. Sometimes all models agree, but that \
+    certainly isn't always the case! To examine the models' output from a random SQuAD2.0\
     example, select `I'm feeling lucky`.")
 
 model_predictions = load_all_predictions(PREDICTION_OPTIONS)

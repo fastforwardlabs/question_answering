@@ -135,6 +135,7 @@ def relsnip(context, num_fragments=5):
 def make_url(segment, url):
     new_segment = f'<a target="_blank" href="{url}">{segment}</a>'
     return new_segment
+    
 
 # ------ SIDEBAR SELECTIONS ------ 
 image = Image.open(absolute_path("images", "cloudera-fast-forward.png"))
@@ -161,7 +162,7 @@ st.sidebar.text("")
 st.sidebar.markdown("By default, the QA Model will only process the Wikipedia **summary** for answers. \
     This saves time since Wikipedia pages are long and QA models are *slow*. \
     Here, you can opt to use the **full text** of the article, or you can \
-    use **RelSnip**, which uses BM25 to identify the most relevant sections \
+    choose **RelSnip**, which uses BM25 to identify the most relevant sections \
     of Wikipedia pages.")
 
 context_choice = st.sidebar.selectbox(
@@ -175,6 +176,7 @@ if context_selection == 'relsnip':
     )
 
 st.sidebar.markdown("**NOTE: Including more text often results in a better answer, but longer inference times.**")
+
 # ------ BEGIN APP ------ 
 st.title("Question Answering with ")
 image = absolute_path("images/669px-Wikipedia-logo-v2-en.svg.png")
@@ -199,14 +201,13 @@ for i, result in enumerate(results):
     title_url = make_url(result, wiki_page.url)
     st.markdown("### "+ str(i+1)+') '+title_url, unsafe_allow_html=True)
 
+    use_full_text = True
     # grab text for answer extraction
     if context_selection == "full":
         context = wiki_page.content
-        use_full_text = True
     elif context_selection == 'relsnip':
         context = wiki_page.content
         context = relsnip(context, num_sections)
-        use_full_text = True
     else:
         context = wiki_page.summary
         use_full_text = False
