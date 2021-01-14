@@ -45,11 +45,10 @@ import altair as alt
 import matplotlib.pyplot as plt
 import json
 
-#SQUAD_DIR = "/Users/mbeck/Projects/ff14/data/raw/squad/"
-#MED_DIR = "/Users/mbeck/Projects/ff14/data/raw/covid/"
+from qa.utils import absolute_path
 
-SQUAD_DIR = "/home/cdsw/data/squad/"
-MED_DIR = "/home/cdsw/data/covidQA/"
+SQUAD_DIR = "data/squad/"
+MED_DIR = "data/medical/"
 
 COLORS = ["#00828c", "#ff8300"]
 
@@ -58,10 +57,9 @@ def load_data(data_type, set_type='train'):
   if 'squad' in data_type.lower():
     filename = f"{SQUAD_DIR}/{set_type}-v2.0.json"
   if 'medical' in data_type.lower():
-    #filename = f"{MED_DIR}/covid_bioasq_{set_type}.json"
     filename = f"{MED_DIR}/COVID-QA.json"
   
-  data = json.load(open(filename, 'r'))
+  data = json.load(open(absolute_path(filename), 'r'))
   stats = compute_dataset_statistics(data)
   return data, stats
 
@@ -189,14 +187,15 @@ st.title("QA Data Visualizer")
 st.write("Question answering applications seem to work like magic, providing \
           answers when given raw blocks of text and a corresponding question. \
           However, training and evaluating these systems requires highly \
-          structured data. This app explores that structure and allows you to \
-          compare various aspects of different training datasets.")
+          structured data. This app explores that structure for two QA datasets: \
+          the canonical [SQuAD2.0](https://rajpurkar.github.io/SQuAD-explorer/) dataset,\
+          and the [COVID-QA](https://github.com/deepset-ai/COVID-QA) medical research dataset.")
 
-st.markdown("The training and evaluation scripts in this repo are based on \
-              those implemented by the HuggingFace team in the [transformers](https://huggingface.co/transformers/) \
-              Python library. These scripts require data in JSON format with \
-              a specific schema and keywords. The minimum required schema is \
-              shown below (you can collapse it by clicking the arrows).")
+st.markdown("The training and evaluation scripts that accompany this repo are based on \
+             those implemented by the HuggingFace team in the [transformers](https://huggingface.co/transformers/) \
+             Python library. These scripts require QA data in JSON format with \
+             a specific schema and keywords. The minimum required schema is \
+             shown below (you can collapse it by clicking the arrows).")
 
 
 st.json({
