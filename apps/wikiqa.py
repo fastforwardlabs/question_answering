@@ -38,16 +38,20 @@
 #
 # ###########################################################################
 
-import streamlit as st
+from PIL import Image
+from rank_bm25 import BM25Okapi
 import wikipedia as wiki
 import pandas as pd
-from PIL import Image
-from qa.utils import absolute_path
+import streamlit as st
+
 from transformers import (
     pipeline, 
     AutoModelForQuestionAnswering,
     AutoTokenizer
 )
+
+from qa.utils import absolute_path
+
 
 MODEL_OPTIONS = {
     "BERT":         "deepset/bert-base-cased-squad2",
@@ -56,6 +60,12 @@ MODEL_OPTIONS = {
     "MiniLM":       "deepset/minilm-uncased-squad2",
     "XLM-RoBERTa":  "deepset/xlm-roberta-large-squad2"
     }
+
+CONTEXT_OPTIONS = {
+    "Wikipedia summary paragraph": "summary",
+    "Full Wikipedia article": "full",
+    "Use RelSnip to identify most relevant sections": "relsnip"
+}
 
 @st.cache(allow_output_mutation=True)
 def load_model(model_choice):
@@ -89,11 +99,53 @@ def highlight_text(segment, context, full_text=False):
     new_context = chunk1 + '<span style="background-color: #FFFF00"> **' + chunk2 + '** </span>' + chunk3
     return new_context
 
+
+def relsnip(context, num_fragments=5):
+    # Wiki section headings are wrapped with "==", (e.g., == Color ==)
+    # split the context by article sections
+    chunks = context.split("\n== ") 
+
+    # Remove sections that won't contain an answer 
+    chunks_cleaned = list()
+    for chunk in chunks:
+        subchunks = chunk.split(" ==")
+        if subchunks[0] in ["See also", "References", "Further reading", "External links"]:
+            continue
+        chunks_cleaned.append(chunk)
+
+    # tokenize each chunk and pass to BM25 search algorithm
+    tokenized_chunks = [chunk.split(" ") for chunk in chunks_cleaned]
+    bm25 = BM25Okapi(tokenized_chunks)
+
+    # tokenize the query and score each chunk
+    tokenized_query = query.split(" ")
+    chunk_scores = bm25.get_scores(tokenized_query)
+
+    # sort the chunks by their BM25 score
+    sorted_chunks = sorted([c for s, c in zip(chunk_scores, chunks)], reverse=True)
+
+    # select the num_fragments highest scoring chunks
+    short_context = ""
+    for chunk in sorted_chunks[:num_fragments]:
+        short_context = short_context + chunk
+
+    return short_context
+
+
 def make_url(segment, url):
     new_segment = f'<a target="_blank" href="{url}">{segment}</a>'
     return new_segment
 
 # ------ SIDEBAR SELECTIONS ------ 
+image = Image.open(absolute_path("images", "cloudera-fast-forward.png"))
+st.sidebar.image(image, use_column_width=True)
+
+st.sidebar.markdown("This app demonstrates a simple question answering system on Wikipedia. \
+    The question is first used in Wikipedia's default search engine, \
+    resulting in a ranked list of relevant Wikipedia pages. \
+    The question and each Wikipedia page are then sent to the QA model, which returns answers \
+    extracted from the text.")
+
 model_choice = st.sidebar.selectbox(
     "Choose a Transformer model:",
     list(MODEL_OPTIONS.keys())
@@ -105,29 +157,28 @@ number_of_pages = st.sidebar.slider(
 number_of_answers = st.sidebar.slider(
     "How many answers should the model suggest for each Wikipedia page?", 1,5,1)
 
-use_full_text = st.sidebar.checkbox(
-    "Use full text rather than summaries of Wikipedia pages (slower but better answers)"
-)
+st.sidebar.text("")
+st.sidebar.markdown("By default, the QA Model will only process the Wikipedia **summary** for answers. \
+    This saves time since Wikipedia pages are long and QA models are *slow*. \
+    Here, you can opt to use the **full text** of the article, or you can \
+    use **RelSnip**, which uses BM25 to identify the most relevant sections \
+    of Wikipedia pages.")
 
+context_choice = st.sidebar.selectbox(
+    "Choose which part of the Wikipedia page(s) to process:",
+    list(CONTEXT_OPTIONS.keys())
+)
+context_selection = CONTEXT_OPTIONS[context_choice]
+if context_selection == 'relsnip':
+    num_sections = st.sidebar.slider(
+        "How many sections should RelSnip identify?", 3, 7, 5
+    )
+
+st.sidebar.markdown("**NOTE: Including more text often results in a better answer, but longer inference times.**")
 # ------ BEGIN APP ------ 
 st.title("Question Answering with ")
 image = absolute_path("images/669px-Wikipedia-logo-v2-en.svg.png")
 st.image(Image.open(image), width=400) 
-
-st.markdown("This app demonstrates how to build a simple question answering system on Wikipedia. \
-    You can choose one of five Transformer models that have already been trained for extractive \
-    question answering. When selecting a model, if that model has never been called before, its \
-    weights will be downloaded before it can be used for question answering. For large \
-    models this can take quite some time. Once cached, switching between models will be seemless.")
-
-st.markdown("A question entered below will first be used in Wikipedia's default search engine, \
-    resulting in a ranked list of Wikipedia pages that are most related to the question. \
-    The question and each Wikipedia page are then sent to the QA model, which returns answers \
-    extracted from the text. These answers are displayed below a snippet of the Wikipedia article. \
-    By default, only the page summary is used when searching for answers to questions. \
-    This saves time since many Wikipedia pages are very long and QA models can be very slow. \
-    However you can choose to use the full text of the article in the sidebar. This usually provides \
-    better results, though it does take longer to process.")
 
 # ------ LOAD QA MODEL ------ 
 reader = load_model(model_choice)
@@ -149,10 +200,16 @@ for i, result in enumerate(results):
     st.markdown("### "+ str(i+1)+') '+title_url, unsafe_allow_html=True)
 
     # grab text for answer extraction
-    if use_full_text:
+    if context_selection == "full":
         context = wiki_page.content
+        use_full_text = True
+    elif context_selection == 'relsnip':
+        context = wiki_page.content
+        context = relsnip(context, num_sections)
+        use_full_text = True
     else:
         context = wiki_page.summary
+        use_full_text = False
         
     # extract answers
     inputs = {'question':query, 'context':context}
