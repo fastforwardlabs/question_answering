@@ -41,9 +41,10 @@
 
 def main():
     # download the SQUAD2.0 train and dev sets
-    from qa.data.fetch import download_squad
+    from qa.data.fetch import download_squad, download_covidQA
 
     download_squad(version=2)
+    download_covidQA()
 
     # download and cache pre-trained QA models from HF Model Repository
     from qa.model_utils import load_model_and_tokenizer

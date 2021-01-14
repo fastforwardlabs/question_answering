@@ -73,7 +73,7 @@ def download_covidQA():
     print("Downloading COVID-QA dataset...")
     
     url = "https://github.com/deepset-ai/COVID-QA/raw/master/data/question-answering/COVID-QA.json"
-    output_filename = absolute_path("data/covidQA/COVID-QA.json")
+    output_filename = absolute_path("data/medical/COVID-QA.json")
     
     create_path(output_filename)
     urllib.request.urlretrieve(url, output_filename)
