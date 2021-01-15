@@ -40,14 +40,6 @@ Let's examine each of the important folders in turn.
 ### `apps`
 The applications accompanying this project come with launcher scripts to assist launching an Application with CDSW/CML. To launch the applications in another environment, run the code inside the launcher file, with the prefixed `!` removed. You may need to specify different ports. 
 
-For example, to launch WikiQA in a CML/CDSW session use 
-
-`!streamlit run apps/wikiqa.py  --server.port $CDSW_APP_PORT --server.address 127.0.0.1`
-
-In a local environment (your laptop, say), you can instead simply call
-
-`streamlit run apps/wikiqa.py`
-
 These three apps are largely, but not entirely, independent of the rest of the content contained in this repo, which was developed for practioners to more easily train and evaluate QA models in CML/CDSW. We briefly cover the structure here but save usage details until the end of this README. 
 
 ### `qa`
@@ -121,6 +113,18 @@ The apps and scripts designed to work with the `qa` library make use of two open
 
 * [SQuAD2.0](https://rajpurkar.github.io/SQuAD-explorer/) is a canonical QA dataset that is the current benchmark against which all QA models are evaluated. 
 * [COVID-QA](https://github.com/deepset-ai/COVID-QA) is a smaller dataset of medical research papers and questions focused on the novel coronavirus. 
+
+### Starting the Applications
+As mentioned earlier, each application comes with a launcher scripts to assist launching an Application with CDSW/CML. However, you can also launch the applications from a Session or in another environment altogether. 
+
+For example, to launch WikiQA in a CML/CDSW session use
+
+`!streamlit run apps/wikiqa.py  --server.port $CDSW_APP_PORT --server.address 127.0.0.1`
+(This is the same as executing the launch script itself.)
+
+In a local environment (your laptop, say), you can instead simply call
+
+`streamlit run apps/wikiqa.py`
 
 -------------------------
 
