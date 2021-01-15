@@ -51,10 +51,10 @@ def main():
 
     pretrained_model_names = [
         "deepset/bert-base-cased-squad2",
-        "mbeck/roberta-base-squad2", 
+        "mbeck/roberta-base-squad2",
         "twmkn9/distilbert-base-uncased-squad2",
         "deepset/minilm-uncased-squad2",
-        "deepset/xlm-roberta-large-squad2"
+        "deepset/xlm-roberta-large-squad2",
     ]
 
     for model_name in pretrained_model_names:

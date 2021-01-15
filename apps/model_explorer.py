@@ -51,27 +51,27 @@ from qa.data.processing import SquadLikeProcessor
 from qa.utils import absolute_path
 
 # Plotting defaults
-plt.style.use('fivethirtyeight')
+plt.style.use("fivethirtyeight")
 COLORS = ["#00828c", "#ff8300"]
 
 PREDICTION_DIR = "data/predictions/"
 DATA_DIR = "data/squad/"
 
 PREDICTION_OPTIONS = {
-    "BERT":         "deepset-bert-base-cased-squad2",
-    "RoBERTa":      "mbeck-roberta-base-squad2", 
-    "DistilBERT":   "twmkn9-distilbert-base-uncased-squad2",
-    "MiniLM":       "deepset-minilm-uncased-squad2/",
-    "XLM-RoBERTa":  "deepset-xlm-roberta-large-squad2",   
+    "BERT": "deepset-bert-base-cased-squad2",
+    "RoBERTa": "mbeck-roberta-base-squad2",
+    "DistilBERT": "twmkn9-distilbert-base-uncased-squad2",
+    "MiniLM": "deepset-minilm-uncased-squad2/",
+    "XLM-RoBERTa": "deepset-xlm-roberta-large-squad2",
 }
 
 PLOT_OPTIONS = {
-    "Exact Match": 'exact',
-    "F1": 'f1',
-    "Exact Match (answerable questions)": 'HasAns_exact',
-    "F1 (answerable questions)": 'HasAns_f1',
+    "Exact Match": "exact",
+    "F1": "f1",
+    "Exact Match (answerable questions)": "HasAns_exact",
+    "F1 (answerable questions)": "HasAns_f1",
     "Exact Match (unanswerable questions)": "NoAns_exact",
-    "F1 (unanswerable questions)": 'NoAns_f1'
+    "F1 (unanswerable questions)": "NoAns_f1",
 }
 
 EXAMPLE_OPTIONS = {
@@ -81,40 +81,45 @@ EXAMPLE_OPTIONS = {
     "Who allegedly haunted the gate?": "57108ee6a58dae1900cd6a1c",
     "What do rapid concentrated sources of oxygen promote?": "5ad2678ad7d075001a42922c",
     "Why do people chose civil disobedience to protest?": "5728d4c03acd2414000dffa1",
-    "I'm feeling lucky": "I'm feeling lucky"
+    "I'm feeling lucky": "I'm feeling lucky",
 }
+
 
 def load_results(data_dir):
     data = json.load(open(absolute_path(data_dir, "results_.json"), "r"))
     return pd.DataFrame(data, index=[0])
 
+
 def load_all_results(prediction_dict):
     dfs = []
     for model_name, data_dir in prediction_dict.items():
-        results = load_results(PREDICTION_DIR+data_dir)
-        results['model'] = model_name
+        results = load_results(PREDICTION_DIR + data_dir)
+        results["model"] = model_name
         dfs.append(results)
     df = pd.concat(dfs, ignore_index=True)
-    df.set_index('model', inplace=True)
+    df.set_index("model", inplace=True)
     return df
 
+
 def load_predictions(data_dir):
-    preds = json.load(open(absolute_path(data_dir, "predictions_.json"), 'r'))
+    preds = json.load(open(absolute_path(data_dir, "predictions_.json"), "r"))
     return pd.Series(preds)
+
 
 def load_all_predictions(prediction_dict):
     dfs = []
     for model_name, data_dir in prediction_dict.items():
-        predictions = load_predictions(PREDICTION_DIR+data_dir)
+        predictions = load_predictions(PREDICTION_DIR + data_dir)
         series = pd.Series(data=predictions, name=model_name)
         dfs.append(pd.DataFrame(series))
     df = pd.concat(dfs, axis=1)
-    return df    
+    return df
+
 
 def plot_results(selection):
     column = PLOT_OPTIONS[selection]
 
-    fig = plt.figure(figsize=(10,8))
+    fig = plt.figure(figsize=(10, 8))
     ax = fig.add_subplot()
     ax2 = ax.twinx()
     ax2.grid(False)
@@ -122,14 +127,26 @@ def plot_results(selection):
     xticks = np.arange(len(all_results.index))
     yticks = np.linspace(0, 90, 10)
     yticks2 = np.around(np.linspace(0, 0.03, 10), decimals=3)
-    
-    width = .35
 
-    ax.bar(xticks-width/2, all_results[column], width=width, color=COLORS[0], label='thing')
-    ax2.bar(xticks+width/2, all_results['avg_time_per_example'], width=width, color=COLORS[1], label='time')
+    width = 0.35
+
+    ax.bar(
+        xticks - width / 2,
+        all_results[column],
+        width=width,
+        color=COLORS[0],
+        label="thing",
+    )
+    ax2.bar(
+        xticks + width / 2,
+        all_results["avg_time_per_example"],
+        width=width,
+        color=COLORS[1],
+        label="time",
+    )
 
     if "exact" in column:
-        ax.set_ylabel('Exact Match')
+        ax.set_ylabel("Exact Match")
     else:
         ax.set_ylabel("F1 Score")
     ax2.set_ylabel("Inference time [sec]")
@@ -140,13 +157,17 @@ def plot_results(selection):
     ax.set_xticklabels(all_results.index)
 
     fig.tight_layout()
- 
+
     st.pyplot(fig)
+
 
 @st.cache(allow_output_mutation=True)
 def load_qa_model(model_choice):
     model_name_or_path = MODEL_OPTIONS[model_choice]
-    return pipeline('question-answering', model=model_name_or_path, tokenizer=model_name_or_path)
+    return pipeline(
+        "question-answering", model=model_name_or_path, tokenizer=model_name_or_path
+    )
+
 
 @st.cache(allow_output_mutation=True)
 def load_squad_validation_set():
@@ -154,44 +175,53 @@ def load_squad_validation_set():
     squad_validation_set = processor.get_dev_examples(DATA_DIR, "dev-v2.0.json")
 
     qid_to_index = {example.qas_id: i for i, example in enumerate(squad_validation_set)}
-    index_to_qid = {i:example.qas_id for i, example in enumerate(squad_validation_set)}
-    #answer_qids = [qas_id for qas_id, has_answer in qid_to_has_answer.items() if has_answer]
-    #no_answer_qids = [qas_id for qas_id, has_answer in qid_to_has_answer.items() if not has_answer]
+    index_to_qid = {i: example.qas_id for i, example in enumerate(squad_validation_set)}
+    # answer_qids = [qas_id for qas_id, has_answer in qid_to_has_answer.items() if has_answer]
+    # no_answer_qids = [qas_id for qas_id, has_answer in qid_to_has_answer.items() if not has_answer]
     return squad_validation_set, qid_to_index, index_to_qid
+
 
 def load_squad_example(idx, squad_validation_set):
     example = squad_validation_set[idx]
     question = example.question_text
     context = example.context_text
-    answers = [answer['text'] for answer in example.answers]
+    answers = [answer["text"] for answer in example.answers]
     return question, context, answers
 
 
 # ------------ START THE APP ------------
 st.title("QA Model Explorer")
-st.markdown("#### \"Which model should I choose for my application?\"")
-st.markdown("We get this question a lot and the answer depends on several factors \
+st.markdown('#### "Which model should I choose for my application?"')
+st.markdown(
+    "We get this question a lot and the answer depends on several factors \
     including the performance of the model on a validation set, the inference time \
     of the model, and memory constraints, among other considerations. This mini app \
     seeks to help you answer some of those questions by \
-    considering both quantitative and qualitative model performance.")
+    considering both quantitative and qualitative model performance."
+)
 
-st.markdown("Our quantitative analysis compares model performance on top-level metrics \
+st.markdown(
+    "Our quantitative analysis compares model performance on top-level metrics \
     across a validation set, as well as inference times for those same models. \
     Some models perform exceptionally well but come with a very high computational cost. \
     Our qualitative analysis allows you to inspect how each candidate QA model answers \
-    the same question -- sometimes in drastically different ways!")
+    the same question -- sometimes in drastically different ways!"
+)
 
-st.header("Quantitative comparison")       
-st.markdown("We evaluated several QA models against the SQuAD2.0 validation set, which \
+st.header("Quantitative comparison")
+st.markdown(
+    "We evaluated several QA models against the SQuAD2.0 validation set, which \
     contains nearly 12,000 examples. About half of them are _answerable_ -- the answer \
     can be found in the context. The other half are impossible to answer, given the context.\
     (Read more about the purpose of unanswerable questions in our \
-    [blog post](https://qa.fastforwardlabs.com/no%20answer/null%20threshold/bert/distilbert/exact%20match/f1/robust%20predictions/2020/06/09/Evaluating_BERT_on_SQuAD.html).)")
+    [blog post](https://qa.fastforwardlabs.com/no%20answer/null%20threshold/bert/distilbert/exact%20match/f1/robust%20predictions/2020/06/09/Evaluating_BERT_on_SQuAD.html).)"
+)
 
-st.markdown("Below you can compare the average F1 and Exact Match scores for each model \
+st.markdown(
+    "Below you can compare the average F1 and Exact Match scores for each model \
     (teal bars), as well as the average inference time (orange bars), for all examples \
-    in the validation set,  just the _answerable_ ones, or just the _unanswerable_ ones.")
+    in the validation set,  just the _answerable_ ones, or just the _unanswerable_ ones."
+)
 all_results = load_all_results(PREDICTION_OPTIONS)
 
 plot_selection = st.selectbox("Select a quantity to view", list(PLOT_OPTIONS.keys()))
@@ -200,12 +230,15 @@ st.write(plot_selection)
 plot_results(plot_selection)
 
 st.markdown("#### What do these quantities mean?")
-st.markdown("F1 score and Exact Match are widely used metrics for question \
+st.markdown(
+    "F1 score and Exact Match are widely used metrics for question \
     answering tasks. They are computed by comparing the characters of the \
     model's predicted answer to the ground truth answer for each question and\
     taking an average over all questions (or just the _answerable_ or \
-    _unanswerable_ questions).")
-st.latex(r'''
+    _unanswerable_ questions)."
+)
+st.latex(
+    r"""
     \begin{aligned}
         \mathrm{F1}& = \frac{2}{\mathrm{recall^{-1}} + \mathrm{precision^{-1}}} 
                      = 2 * \frac{\mathrm{precision} * \mathrm{recall}}{\mathrm{precision} + \mathrm{recall}} \\ \\
@@ -214,30 +247,35 @@ st.latex(r'''
                             0 &\text{otherwise}
                         \end{cases}
     \end{aligned}
-''')
+"""
+)
 
 
 st.header("Qualitative Comparison")
-st.markdown("A high average F1 score is usually a good sign of quality answers but it's\
+st.markdown(
+    "A high average F1 score is usually a good sign of quality answers but it's\
     also worth inspecting these answers for consistency, meaning, and intention. This type \
-    of qualitative analysis can help you better understand the strengths and shortcomings of your model.")
-st.markdown("Below you can choose from several examples in the SQuAD2.0 validation set \
+    of qualitative analysis can help you better understand the strengths and shortcomings of your model."
+)
+st.markdown(
+    "Below you can choose from several examples in the SQuAD2.0 validation set \
     and see how each model answered that question. Sometimes all models agree, but that \
     certainly isn't always the case! To examine the models' output from a random SQuAD2.0\
-    example, select `I'm feeling lucky`.")
+    example, select `I'm feeling lucky`."
+)
 
 model_predictions = load_all_predictions(PREDICTION_OPTIONS)
 squad_validation_set, qid_to_idx, idx_to_qid = load_squad_validation_set()
 
-question_selection = st.selectbox("Choose an example",list(EXAMPLE_OPTIONS.keys()))
+question_selection = st.selectbox("Choose an example", list(EXAMPLE_OPTIONS.keys()))
 qid = EXAMPLE_OPTIONS[question_selection]
 
 if qid == "I'm feeling lucky":
-    idx = np.random.randint(0,len(squad_validation_set)-1, 1)[0]
+    idx = np.random.randint(0, len(squad_validation_set) - 1, 1)[0]
 else:
     idx = qid_to_idx[qid]
 
-question, context, answers = load_squad_example(idx, squad_validation_set) 
+question, context, answers = load_squad_example(idx, squad_validation_set)
 
 st.markdown("### Question")
 st.markdown(question)
@@ -251,9 +289,7 @@ st.table(model_predictions.loc[qid].T)
 
 st.markdown("### Ground Truth Answer(s)")
 if answers:
-    st.write(list(set(answers))) 
+    st.write(list(set(answers)))
 else:
-    st.write("This question is impossible to answer given the context!")                             
-
-
+    st.write("This question is impossible to answer given the context!")
 

@@ -45,16 +45,18 @@ import os
 import json
 from tqdm import tqdm
 
+
 def _is_whitespace(c):
     if c == " " or c == "\t" or c == "\r" or c == "\n" or ord(c) == 0x202F:
         return True
     return False
 
+
 class SquadLikeProcessor:
     """
     Processor for the Question Answering data sets with SQuAD-like structure.
     """
-      
+
     def get_train_examples(self, data_dir, train_file):
         """
         Returns the training examples from the data directory.
@@ -64,14 +66,16 @@ class SquadLikeProcessor:
         """
         if data_dir is None:
             data_dir = ""
-        
+
         filename = os.path.join(data_dir, train_file)
         if not os.path.exists(filename):
-          raise ValueError(f"{filename} does not exist -- please provide valid train_file!")
+            raise ValueError(
+                f"{filename} does not exist -- please provide valid train_file!"
+            )
 
         with open(filename, "r", encoding="utf-8") as reader:
             input_data = json.load(reader)["data"]
-            
+
         return self._create_examples(input_data, "train")
 
     def get_dev_examples(self, data_dir, dev_file):
@@ -86,7 +90,9 @@ class SquadLikeProcessor:
 
         filename = os.path.join(data_dir, dev_file)
         if not os.path.exists(filename):
-          raise ValueError(f"{filename} does not exist -- please provide valid dev_file!")
+            raise ValueError(
+                f"{filename} does not exist -- please provide valid dev_file!"
+            )
 
         with open(filename, "r", encoding="utf-8") as reader:
             input_data = json.load(reader)["data"]
@@ -98,17 +104,17 @@ class SquadLikeProcessor:
         for entry in tqdm(input_data):
             for paragraph in entry["paragraphs"]:
                 context_text = paragraph["context"]
-                
-                # Some data structures have document-level identifiers. 
+
+                # Some data structures have document-level identifiers.
                 # Check for two of the most common ("title" --> SQuAD)
-                if ('document_id' or 'title') in paragraph:
+                if ("document_id" or "title") in paragraph:
                     try:
-                        document_id = paragraph['document_id']
+                        document_id = paragraph["document_id"]
                     except:
-                        document_id = paragraph['title']
+                        document_id = paragraph["title"]
                 else:
-                  document_id = None
-                  
+                    document_id = None
+
                 for qa in paragraph["qas"]:
                     qas_id = qa["id"]
                     question_text = qa["question"]
@@ -137,8 +143,8 @@ class SquadLikeProcessor:
                     )
                     examples.append(example)
         return examples
-      
-      
+
+
 class SquadLikeExample:
     """
     A single training/test example for the Squad dataset, as loaded from disk.
@@ -196,5 +202,8 @@ class SquadLikeExample:
         if start_position_character is not None and not is_impossible:
             self.start_position = char_to_word_offset[start_position_character]
             self.end_position = char_to_word_offset[
-                min(start_position_character + len(answer_text) - 1, len(char_to_word_offset) - 1)
+                min(
+                    start_position_character + len(answer_text) - 1,
+                    len(char_to_word_offset) - 1,
+                )
             ]
