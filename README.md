@@ -63,6 +63,7 @@ These scripts are to be used in conjunction with the `qa` library above and are 
 
 ```
 scripts
+├── README.md
 ├── config.txt
 ├── config_multi-train.py
 ├── evaluate.py
@@ -70,6 +71,8 @@ scripts
 ├── multi-train.py
 └── train.py
 ```
+
+Intended for training and evaluating QA Models, detailed usage for these scripts and the `qa` module are contained in the `README.md` in this directory. 
 
 ### `cml`
 These scripts serve as launch instructions to facilitate the automated project setup on CML. Each script is triggered by the declarative pipeline as defined in the `.project-metadata.yaml` file found in the project's root directory.
@@ -120,6 +123,7 @@ As mentioned earlier, each application comes with a launcher scripts to assist l
 For example, to launch WikiQA in a CML/CDSW session use
 
 `!streamlit run apps/wikiqa.py  --server.port $CDSW_APP_PORT --server.address 127.0.0.1`
+
 (This is the same as executing the launch script itself.)
 
 In a local environment (your laptop, say), you can instead simply call
@@ -127,4 +131,3 @@ In a local environment (your laptop, say), you can instead simply call
 `streamlit run apps/wikiqa.py`
 
 -------------------------
-
