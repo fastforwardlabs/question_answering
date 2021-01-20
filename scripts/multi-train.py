@@ -1,7 +1,7 @@
 # ###########################################################################
 #
 #  CLOUDERA APPLIED MACHINE LEARNING PROTOTYPE (AMP)
-#  (C) Cloudera, Inc. 2020
+#  (C) Cloudera, Inc. 2021
 #  All rights reserved.
 #
 #  Applicable Open Source License: Apache 2.0
@@ -39,27 +39,34 @@
 # ###########################################################################
 
 
-# This script is designed to be run using the Jobs abstraction.
-# This scripts trains a QA model on increasing-sized data from a specialized domain. [LINK TO BLOG POST]
+# This script is designed to be run using the Jobs abstraction and trains a 
+# QA model on increasing-sized data sets from a specialized domain (medical data).
+# This procedure and the results were discussed in the accompanying blog post:  
+# https://qa.fastforwardlabs.com/domain%20adaptation/transfer%20learning/specialized%20datasets/qa/medical%20qa/2020/07/22/QA-for-Specialized-Data.html
 # 
-# It first creates subsets of the original dataset. These subsets contain an increasing
-# number of examples -- i.e., the first subset has only 500 examples, the second has 
-# 1000 (the 500 from the previous subset plus 500 additional examples), and so on.
+# It first creates subsets of the original training dataset. These subsets contain 
+# an increasing number of examples -- i.e., the first subset has only 500 examples, 
+# the second has 1000 (the 500 from the previous subset plus 500 additional examples), 
+# and so on. Once these subsets are created, the training and evaluation scripts are 
+# executed for each subset. 
 #
-# Once these subsets are created, the training script is executed for each subset. 
 # NOTE: it's important that your config.txt contains the correct data directory
 #       for the subsets
-# This training script trains a model on each subset and saves that model to an
-# output directory (designated in config.txt). After completion of the loop, 
-# there will be six models trained on increasing dataset sizes. 
 #
-# Finally, the evaluation script is run for each of the trained models. 
-# The prediction and results outputs are saved to the output_dir designated 
+# This training script trains a **new** model on each subset and saves that model 
+# to an output directory (designated in config.txt) resulting in six models, each
+# trained on increasing dataset sizes. 
+#
+# The predictions and results outputs are saved to the output_dir designated 
 # in the config.txt
 
 from qa.data.utils import create_increasing_sized_train_sets
 
+# These sizes were used in our blog post to train a model on increasing numbers
+# of training data for the the medical dataset
 DEFAULT_SIZES = [500, 1000, 1500, 2000, 2500, 3000]
+
+# These sizes are for testing purposes - no real training set should contain only 5 examples!
 MINI_SIZES = [5,10,15]
 
 original_dataset = "/home/cdsw/data/medical/covid_bioasq_train.json"

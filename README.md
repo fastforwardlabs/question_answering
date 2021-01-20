@@ -6,17 +6,17 @@ The primary outputs of this repository are three small applications that allow t
 ### WikiQA
 This app is a real-world IR-QA system built on top of Wikipedia's search engine.
 
-<img src="images/Screenshot_WikiQA.png" alt="WikiQA question answering interface">
+![WikiQA question answering interface](images/Screenshot_WikiQA.png)
 
 ### Model Explorer
 This app allows the user to compare several pre-trained QA Models on various performance measures. 
 
-<img src="images/Screenshot_ModelExplorer.png" alt="=Model Explorer interface" width="40%">
+![Model Explorer interface](images/Screenshot_ModelExplorer.png)
 
 ### Data Visualizer
 This app lets the user walk through the structure required to train and evaluate Transformer neural networks for the question answring task.
 
-<img src="images/Screenshot_DataVisualizer.png" alt="Data Visualizer interface" width="40%">
+![Data Visualizer interface](images/Screenshot_DataVisualizer.png)
 
 Instructions are given both for general use (on a laptop, say), and for Cloudera CML and CDSW.
 We'll first describe what's here, then go through how to run everything.
@@ -128,54 +128,3 @@ In a local environment (your laptop, say), you can instead simply call
 
 -------------------------
 
-## For NLP Practitioners
-The `qa` module and `scripts` were designed for training and evaluating Transformer models for question answering on CML/CDSW. For example, one can train a vanilla version of BERT on the SQuAD dataset thus teaching it to perform extractive QA. The remainder of this README provides details and instructions for using the `qa` library in conjunction with the `scripts`, as well as how to harness the CML/CDSW abstractions to launch Jobs, Experiments, and deploy Models. 
-
-### Overview of the Train and Evaluate workflows
-At their core, the `scripts/train.py` and `scripts/evaluate.py` scripts are based heavily on a [script](https://github.com/huggingface/transformers/blob/master/examples/question-answering/run_squad.py)
-developed by the [HuggingFace](https://huggingface.co/) team for training [Transformer models](http://jalammar.github.io/illustrated-transformer/) 
-(like BERT) for the task of [extractive question answering](https://huggingface.co/transformers/v3.2.0/task_summary.html#extractive-question-answering). 
-However, that script is cumbersome to use in CDSW/CML, so it has been modified to work in this environment. The result of this modification is that these scripts require a configuration file (`config.txt`) as an argument. The config file contains required and optional parameters that provide an impressive amount of flexibility and functionality when training and evaluating Transformer models. **Many of these parameters are geared towards experienced NLP practictioners; most should be left as their defaults.** 
-
-The first three arguments in `config.txt` are required so we describe them briefly here:
-* `--model_type`: Must be a valid model type allowed by HuggingFace (e.g. "bert" or "roberta") 
-* `--model_name_or_path`: Can be either of the following: 
-  * A string with the _identifier_ name of a pretrained model to load from cache or download from the 
-  [HF model repository](https://huggingface.co/models), e.g., "bert-base-uncased" or "deepset/bert-base-cased-squad2"
-  * A path to a directory containing model weights, e.g., `/home/cdsw/models/my_model_directory/`
-* `--output_dir`: path of directory to store trained model weights (if training) or predictions and performance results (if evaluating)
-
-Note: The first time an identifier name is called, those model weights will be downloaded and cached from the HF model repo. This can take a long time and a lot of disk space for large models. Additional calls to that particular model name will load model weights from the cache.
-
-Note: When training or evaluating models on the SQuAD2.0 dataset, you must use an Engine Profile with a minimum of 2 vCPU / 16 GiB. Any less and the session / job will fail due to memory constraints. A GPU is _strongly_ preferred for these tasks!
-
-Note: Adding an argument (e.g. `--train-file  my_training_file.json`) after the call to the config file will override the value for that argument in the config file. This is useful if you want to programmatically train or evaluate on many datasets in succession. See an example in `scripts/multi-train.py`. 
-
-### Training and evaluating a QA model in a Session
-
-#### To Train
-In `config.txt`, first specify the following information: 
-* the model you want to train 
-* the output directory where trained model weights will be stored
-* the directory and filename of the training data 
-
-Then run the following in an open Session:
-`!python3 scripts/train.py @scripts/config.txt`
-
-#### To Evaluate 
-In `config.txt`, first specify the following information: 
-* the model you wish to evaluate 
-* the output directory where results and predictions will be stored
-* the directory and filename of the validation data
-
-Then run the following in an open Session:
-`!python3 scripts/evaluate.py @scripts/config.txt`
-
-
-### Training and evaluating a QA model as a Job
-The `scripts/multi-train.py` script demonstrates how to train and evaluate in succession. This script is designed to be run as a Job by selecting this file in the **Script** field of the Create a Job menu. 
-
-### Serving a QA Model
-Once you have a QA Model that you're satisfied with you can expose it via the Model abstraction. To do so, update the `DEFAULT_MODEL` global key at the top of `scripts/model.py` to reflect the model name or model directory you wish to serve. Then select this script under the **Script** field in the Create a Model menu. 
-
--------------------------

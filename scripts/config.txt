@@ -1,7 +1,7 @@
 # ###########################################################################
 #
 #  CLOUDERA APPLIED MACHINE LEARNING PROTOTYPE (AMP)
-#  (C) Cloudera, Inc. 2020
+#  (C) Cloudera, Inc. 2021
 #  All rights reserved.
 #
 #  Applicable Open Source License: Apache 2.0
@@ -50,8 +50,7 @@
 #--verbose_logging                  # Uncomment this flag to print all warnings related to data processing 
 #--overwrite_output_dir             # Uncomment this flag to overwrite the content of the output directory
 --overwrite_cache                  # Uncomment this flag to overwrite the cached training and/or evaluation datasets
-# TODO: CHANGE THE NAME OF THIS FLAG
---version_2_with_negative          # Uncomment this flag if working with examples wherein some do not have an answer 
+--version_2_with_negative          # Uncomment this flag if working with "unanswerable" examples (e.g., SQuAD2.0)
 
 # ================ [OPTIONAL TRANSFORMER PARAMS] ================
 --do_lower_case                           # Uncomment this flag if using an uncased model
@@ -61,22 +60,22 @@
 --lang_id   0                       # 0 is English
 
 # ================ [QA BEHAVIOR PARAMS] ================
---max_seq_length        384         # The maximum total input sequence length after tokenization
+--max_seq_length        384         # The maximum total input sequence length after tokenization (max is 512)
 --doc_stride            128         # Stride between segments when chunking long documents 
 --max_query_length      64          # Max number of tokens for the question
 --max_answer_length     30          # Max number of tokens allowed for the answer
 
---null_score_diff_threshold 0.0
+--null_score_diff_threshold 0.0     
 --n_best_size   5                  # Number of top best predictions to generate for each question during evaluation 
 
-# ================ [EPOCHS / BATCHING / LOGGING -- MOSTLY ONLY FOR TRAINING] ================
+# ================ [EPOCHS / BATCHING / LOGGING -- MOSTLY USED FOR TRAINING] ================
 --num_train_epochs  2.0
 --per_gpu_train_batch_size  16
 --per_gpu_eval_batch_size   16      # If evaluating with a GPU - set the evaluation batch size
---logging_steps 500
---save_steps    -1
---warmup_steps  0
---max_steps     -1
+--logging_steps 500                 # logs of the training process are written ever logging_steps steps
+--save_steps    -1                  # Save a snapshot of the model trained up to this point every save_steps steps (Note: this can quickly eat up a lot of disk space as these models can be very large)
+--warmup_steps  0                   # Perform linear warmup over warmup_steps steps
+--max_steps     -1                  # Force training to end after max_steps steps
 
 # ================ [OPTIMIZER PARAMS -- TRAINING ONLY] ================
 --learning_rate 3e-5
@@ -87,9 +86,9 @@
 
 # ================ [MISC PARAMS] ================
 --seed          42
---local_rank    -1
+--local_rank    -1                  # For use in distributed GPU setting: this number should reflect the total # of GPUs
 --threads       12                  # Number of threads to use for CPU tasks
---no_cuda                           # Uncomment this flag to not use CUDA even if available
+--no_cuda                           # Uncomment this flag to not use CUDA (GPUs) even if available
 #--eval_all_checkpoints             # Uncomment this flag to evaluate checkpoints starting with the same prefix as model_name ending and ending with step number
 #--evaluate_during_training         # Uncomment this flag to run evaluation during training at each logging step
 
