@@ -47,9 +47,8 @@ tasks:
     environment_variables:
       TASK_TYPE: START_APPLICATION
     kernel: python3
-    default_resources:
-       cpu: 2
-       memory: 8
+    cpu: 2
+    memory: 8
 
   - type: start_application
     name: QA Model Explorer
@@ -58,9 +57,8 @@ tasks:
     environment_variables:
       TASK_TYPE: START_APPLICATION
     kernel: python3
-    default_resources:
-       cpu: 1
-       memory: 1
+    cpu: 1
+    memory: 1
 
   - type: start_application
     name: QA Data Explorer
@@ -69,6 +67,5 @@ tasks:
     environment_variables:
       TASK_TYPE: START_APPLICATION
     kernel: python3
-    default_resources:
-       cpu: 1
-       memory: 1
+    cpu: 1
+    memory: 1
