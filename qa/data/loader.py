@@ -51,7 +51,8 @@ from transformers.data.processors.squad import (
     squad_convert_examples_to_features,
 )
 
-
+# The following function is adapted from the original HuggingFace functionality
+# found at https://github.com/huggingface/transformers/blob/v2.11.0/examples/question-answering/run_squad.py
 def load_and_cache_examples(args, tokenizer, evaluate=False, output_examples=False):
 
     logger = (

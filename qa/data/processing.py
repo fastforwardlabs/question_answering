@@ -38,8 +38,9 @@
 #
 # ###########################################################################
 
-# These are nearly identical to the transformers classes but are gently
-# modified to apply to slightly more generic json structures
+# The functions in this file are adapted from the original HuggingFace functions
+# that can be found here https://github.com/huggingface/transformers/blob/v2.11.0/src/transformers/data/processors/squad.py
+# They have been gently modified to allow more generic json structures
 
 import os
 import json
