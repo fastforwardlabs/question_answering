@@ -64,6 +64,10 @@ class FancyArgumentParser(argparse.ArgumentParser):
 
 parser = FancyArgumentParser(fromfile_prefix_chars="@")
 
+# The following parameters are gently modified from the original HuggingFace 
+# version found at 
+# https://github.com/huggingface/transformers/blob/v2.11.0/examples/question-answering/run_squad.py
+
 # Required parameters
 parser.add_argument(
     "--model_type",

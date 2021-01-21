@@ -38,6 +38,9 @@
 #
 # ###########################################################################
 
+# This script is adapted from the original HuggingFace Transformers functionality
+# found at https://github.com/huggingface/transformers/blob/v2.11.0/examples/question-answering/run_squad.py
+
 import os
 import torch
 

@@ -46,7 +46,8 @@ import random
 import numpy as np
 import torch
 
-
+# This function is adapted from the original HuggingFace Transformers functionality
+# found at https://github.com/huggingface/transformers/blob/v2.11.0/examples/question-answering/run_squad.py
 def set_seed(seed):
     random.seed(seed)
     np.random.seed(seed)
@@ -54,11 +55,13 @@ def set_seed(seed):
     # if args.n_gpu > 0:
     #    torch.cuda.manual_seed_all(seed)
 
-
+# This function is adapted from the original HuggingFace Transformers functionality
+# found at https://github.com/huggingface/transformers/blob/v2.11.0/examples/question-answering/run_squad.py
 def to_list(tensor):
     return tensor.detach().cpu().tolist()
 
-
+# This function is adapted from the original HuggingFace Transformers functionality
+# found at https://github.com/huggingface/transformers/blob/v2.11.0/examples/question-answering/run_squad.py
 def initialize_device(args):
     # Setup CUDA, GPU & distributed training
     if args.local_rank == -1 or args.no_cuda:
@@ -80,7 +83,8 @@ def initialize_device(args):
 
     return device
 
-
+# This function is adapted from the original HuggingFace Transformers functionality
+# found at https://github.com/huggingface/transformers/blob/v2.11.0/examples/question-answering/run_squad.py
 def initialize_logging(args, module):
     logger = logging.getLogger(module)
 

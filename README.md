@@ -72,7 +72,7 @@ scripts
 └── train.py
 ```
 
-Intended for training and evaluating QA Models, detailed usage for these scripts and the `qa` module are contained in the `README.md` in this directory. 
+Intended for training and evaluating QA Models, detailed usage for these scripts and the `qa` module are contained in the [`README.md`](https://github.com/fastforwardlabs/question_answering/tree/master/scripts) that accompanies the `scripts` directory. 
 
 ### `cml`
 These scripts serve as launch instructions to facilitate the automated project setup on CML. Each script is triggered by the declarative pipeline as defined in the `.project-metadata.yaml` file found in the project's root directory.
@@ -129,5 +129,14 @@ For example, to launch WikiQA in a CML/CDSW session use
 In a local environment (your laptop, say), you can instead simply call
 
 `streamlit run apps/wikiqa.py`
+
+
+### Deploying on CML
+
+There are three ways to launch this project on CML:
+
+1. From Prototype Catalog - Navigate to the Prototype Catalog on a CML workspace, select the "Deep Learning for Question Answering" tile, click "Launch as Project", click "Configure Project"
+2. As ML Prototype - In a CML workspace, click "New Project", add a Project Name, select "ML Prototype" as the Initial Setup option, copy in the [repo URL](https://github.com/fastforwardlabs/question_answering), click "Create Project", click "Configure Project"
+3. Manual Setup - In a CML workspace, click "New Project", add a Project Name, select "Git" as the Initial Setup option, copy in the [repo URL](https://github.com/fastforwardlabs/question_answering), click "Create Project". Launch a Python3 Workbench Session with at least 8GB of memory and 2vCPUs. Then follow the Installation instructions above.
 
 -------------------------

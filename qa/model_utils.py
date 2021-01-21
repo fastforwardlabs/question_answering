@@ -81,7 +81,8 @@ def load_model_and_tokenizer(model_name_or_path):
     model = AutoModelForQuestionAnswering.from_pretrained(model_name_or_path)
     return model, tokenizer
 
-
+# The following function is adapted from the original HuggingFace functionality
+# found at https://github.com/huggingface/transformers/blob/v2.11.0/examples/question-answering/run_squad.py
 def load_pretrained_model(args):
     args.model_type = args.model_type.lower()
     config = AutoConfig.from_pretrained(
@@ -102,7 +103,8 @@ def load_pretrained_model(args):
 
     return model, tokenizer
 
-
+# The following function is adapted from the original HuggingFace functionality
+# found at https://github.com/huggingface/transformers/blob/v2.11.0/examples/question-answering/run_squad.py
 def train_model(args, train_dataset, model, tokenizer):
     """ INITIALIZING """
 
@@ -391,7 +393,8 @@ def train_model(args, train_dataset, model, tokenizer):
 
     return global_step, tr_loss / global_step
 
-
+# The following function is adapted from the original HuggingFace functionality
+# found at https://github.com/huggingface/transformers/blob/v2.11.0/examples/question-answering/run_squad.py
 def evaluate_model(args, model, tokenizer, prefix=""):
 
     logger = logging.getLogger("Eval.evaluate_model")
