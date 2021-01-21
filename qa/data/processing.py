@@ -39,20 +39,22 @@
 # ###########################################################################
 
 # The functions in this file are adapted from the original HuggingFace functions
-# that can be found here https://github.com/huggingface/transformers/blob/v2.11.0/src/transformers/data/processors/squad.py
+# that can be found here 
 # They have been gently modified to allow more generic json structures
 
 import os
 import json
 from tqdm import tqdm
 
-
+# The following function is adapted from the original HuggingFace functionality
+# found at https://github.com/huggingface/transformers/blob/v2.11.0/src/transformers/data/processors/squad.py
 def _is_whitespace(c):
     if c == " " or c == "\t" or c == "\r" or c == "\n" or ord(c) == 0x202F:
         return True
     return False
 
-
+# The following class is adapted from the original HuggingFace class found in 
+# https://github.com/huggingface/transformers/blob/v2.11.0/src/transformers/data/processors/squad.py
 class SquadLikeProcessor:
     """
     Processor for the Question Answering data sets with SQuAD-like structure.
@@ -145,7 +147,8 @@ class SquadLikeProcessor:
                     examples.append(example)
         return examples
 
-
+# The following class is adapted from the original HuggingFace class found in 
+# https://github.com/huggingface/transformers/blob/v2.11.0/src/transformers/data/processors/squad.py
 class SquadLikeExample:
     """
     A single training/test example for the Squad dataset, as loaded from disk.
