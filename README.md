@@ -104,14 +104,14 @@ To install dependencies, first create and activate a new virtual environment thr
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-python3 cml/download_data_models.py
+python3 cml/download_data_and_models.py
 ```
 
 In CML or CDSW, no virtual env is necessary. Instead, inside a Python 3 session (with at least 2 vCPU / 8 GiB Memory), simply run
 
 ```python
 !pip3 install -r requirements.txt       # notice `pip3`, not `pip`
-!python3 cml/download_data_models.py    # download all datasets and models    
+!python3 cml/download_data_and_models.py    # download all datasets and models    
 ```
 
 Note: the `cml/download_data_models.py` script downloads five Transformer models and two open-source datasets. Transformer models are quite large so this can take several minutes to complete. Because these models can instead be downloaded on-the-fly while using the apps, this step can be skipped. However, you **must** download the data!  To download *just* the data (and not the models), start a python terminal or CML/CDSW Session and perform the following: 
